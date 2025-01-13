@@ -1,0 +1,18 @@
+{
+  "name": "git-addons",
+  "version": "0.0.1",
+  "description": "A simple CLI script to help me extend on top of already pre-existing git commands",
+  "main": "app.js",
+  "author": "shadmeoli",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts" : {
+    "dev": "node app.js"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "inquirer": "^12.3.1",
+    "ora": "^8.1.1"
+  }
+}
