@@ -123,7 +123,7 @@ setup_ssh() {
 # Set up git-who command
 setup_git_who() {
     log "Setting up Git alias 'who'..."
-    ALIAS_COMMAND="!f() { node \"$APP_PATH\" \"\$@\"; }; f"
+    ALIAS_COMMAND="!node \"$APP_PATH\" \"\$@\";"
     git config --global alias.who "$ALIAS_COMMAND"
 
     # Verify the installation
