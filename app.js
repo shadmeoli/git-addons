@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import inquirer from 'inquirer';
 import ora from 'ora';
+import Table from 'cli-table3';
 
 // Function to display help documentation
 const displayHelp = () => {
@@ -68,13 +69,30 @@ const fetchLogsForAuthor = (author, timeRange) => {
   try {
     const spinner = ora(`Fetching logs for ${author}...`).start();
 
-    const logs = execSync(`git log --author="${author}" --since="${timeRange}" --oneline`)
+    const logs = execSync(
+      `git log --author="${author}" --since="${timeRange}" --pretty=format:"%h|%s|%ad|%an" --date=short`
+    )
       .toString()
       .trim();
 
     spinner.succeed('Logs fetched successfully!');
+    
     if (logs) {
-      console.log(`\nRecent logs for ${author}:\n${logs}`);
+      const table = new Table({
+        head: ['Hash', 'Message', 'Date', 'Author'],
+        style: {
+          head: ['cyan'],
+          border: ['gray'],
+        },
+      });
+
+      logs.split('\n').forEach((log) => {
+        const [hash, message, date, authorName] = log.split('|');
+        table.push([hash, message, date, authorName]);
+      });
+
+      console.log(`\nRecent logs for ${author}:`);
+      console.log(table.toString());
     } else {
       console.log(`\nNo logs found for ${author} in the past ${timeRange}.`);
     }
