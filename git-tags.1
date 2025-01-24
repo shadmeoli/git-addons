@@ -1,0 +1,24 @@
+.TH GIT-TAGS 1 "April 2025" "git-tags 1.0" "Git Manual"
+.SH NAME
+git-tags \- List Git tags from a repository
+.SH SYNOPSIS
+.B git tags
+\fI<repo-name>\fR
+.SH DESCRIPTION
+\fBgit-tags\fR fetches and displays Git tags from a specified repository.
+.SH OPTIONS
+.TP
+\fI<repo-name>\fR
+Specify the repository to fetch tags from. This can be a local path (e.g., ".") or a remote repository URL.
+.TP
+\fB\-\-help\fR
+Display help information.
+.SH EXAMPLES
+.TP
+List tags from the current repository:
+\fBgit tags .\fR
+.TP
+List tags from a remote repository:
+\fBgit tags https://github.com/user/repo.git\fR
+.SH SEE ALSO
+\fBgit-who\fR(1)

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installation script for the git-who tool
+# Installation script for git-who and git-tags tools with Bun
 
 set -e  # Exit on error
 set -u  # Exit on undefined variable
@@ -24,41 +24,124 @@ warn() {
     echo -e "${YELLOW}[WARN]${NC} $1"
 }
 
+# Check for GitHub CLI (gh) at the top level
+check_gh_cli() {
+    log "Checking for GitHub CLI..."
+    if ! command -v gh &> /dev/null; then
+        warn "GitHub CLI (gh) is not installed"
+        read -p "Would you like to install GitHub CLI? [Y/n] " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]] || [ -z "$REPLY" ]; then
+            log "Installing GitHub CLI..."
+            case "$OSTYPE" in
+                darwin*)
+                    if command -v brew &> /dev/null; then
+                        brew install gh
+                    else
+                        warn "Homebrew is required to install GitHub CLI on macOS"
+                        warn "Please install Homebrew first from https://brew.sh"
+                        read -p "Continue installation without GitHub CLI? [Y/n] " -n 1 -r
+                        echo
+                        if [[ ! $REPLY =~ ^[Yy]$ ]] && [ ! -z "$REPLY" ]; then
+                            log "Installation aborted"
+                            exit 0
+                        fi
+                    fi
+                    ;;
+                linux-gnu*)
+                    # For Debian/Ubuntu
+                    if command -v apt &> /dev/null; then
+                        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+                        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+                        sudo apt update
+                        sudo apt install gh
+                    # For Fedora/CentOS/RHEL
+                    elif command -v dnf &> /dev/null; then
+                        sudo dnf install 'dnf-command(config-manager)'
+                        sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+                        sudo dnf install gh
+                    # For Arch Linux
+                    elif command -v pacman &> /dev/null; then
+                        sudo pacman -S github-cli
+                    else
+                        warn "Unsupported Linux distribution for automatic GitHub CLI installation"
+                        warn "Please install GitHub CLI manually following instructions at: https://github.com/cli/cli#installation"
+                        read -p "Continue installation without GitHub CLI? [Y/n] " -n 1 -r
+                        echo
+                        if [[ ! $REPLY =~ ^[Yy]$ ]] && [ ! -z "$REPLY" ]; then
+                            log "Installation aborted"
+                            exit 0
+                        fi
+                    fi
+                    ;;
+                *)
+                    warn "Unsupported operating system for automatic GitHub CLI installation"
+                    warn "Please install GitHub CLI manually following instructions at: https://github.com/cli/cli#installation"
+                    read -p "Continue installation without GitHub CLI? [Y/n] " -n 1 -r
+                    echo
+                    if [[ ! $REPLY =~ ^[Yy]$ ]] && [ ! -z "$REPLY" ]; then
+                        log "Installation aborted"
+                        exit 0
+                    fi
+                    ;;
+            esac
+        else
+            # User doesn't want to install GitHub CLI
+            read -p "Continue installation without GitHub CLI? [Y/n] " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]] && [ ! -z "$REPLY" ]; then
+                log "Installation aborted"
+                exit 0
+            fi
+        fi
+    else
+        log "GitHub CLI is already installed: $(gh --version | head -n 1)"
+    fi
+}
+
 # Get the absolute path of the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_PATH="$SCRIPT_DIR/app.js"
+WHO_TS_PATH="$SCRIPT_DIR/who.ts"
+TAGS_TS_PATH="$SCRIPT_DIR/tags.ts"
 
-# Verify app.js exists
-if [ ! -f "$APP_PATH" ]; then
-    error "app.js not found at $APP_PATH"
+# Verify scripts exist
+if [ ! -f "$WHO_TS_PATH" ]; then
+    error "'who.ts' script not found at $WHO_TS_PATH"
 fi
 
-log "Starting installation of git-who..."
+if [ ! -f "$TAGS_TS_PATH" ]; then
+    error "'tags.ts' script not found at $TAGS_TS_PATH"
+fi
 
-# Check and install Node.js
-check_nodejs() {
-    if ! command -v node &> /dev/null; then
-        log "Node.js is not installed. Installing Node.js..."
-        case "$OSTYPE" in
-            darwin*)
-                if ! command -v brew &> /dev/null; then
-                    error "Homebrew is required but not installed. Please install Homebrew first."
-                fi
-                brew install node
-                ;;
-            linux-gnu*)
-                if ! command -v curl &> /dev/null; then
-                    sudo apt-get update && sudo apt-get install -y curl
-                fi
-                curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-                sudo apt-get install -y nodejs
-                ;;
-            *)
-                error "Unsupported operating system: $OSTYPE"
-                ;;
-        esac
+log "Starting installation of Git tools..."
+
+# Check and install Bun
+check_bun() {
+    if ! command -v bun &> /dev/null; then
+        log "Bun is not installed. Installing Bun..."
+        curl -fsSL https://bun.sh/install | bash
+        
+        # Source the updated profile to make bun available
+        if [ -f "$HOME/.bashrc" ]; then
+            source "$HOME/.bashrc"
+        elif [ -f "$HOME/.zshrc" ]; then
+            source "$HOME/.zshrc"
+        fi
+        
+        # Check again if bun is available
+        if ! command -v bun &> /dev/null; then
+            export PATH="$HOME/.bun/bin:$PATH"
+        fi
+        
+        if ! command -v bun &> /dev/null; then
+            warn "Bun was installed but is not available in the current shell"
+            warn "Please open a new terminal or run: export PATH=\"\$HOME/.bun/bin:\$PATH\""
+            read -p "Press Enter to continue..."
+        else
+            log "Bun is now installed: $(bun --version)"
+        fi
     else
-        log "Node.js is already installed: $(node --version)"
+        log "Bun is already installed: $(bun --version)"
     fi
 }
 
@@ -68,6 +151,9 @@ check_git() {
         log "Git is not installed. Installing Git..."
         case "$OSTYPE" in
             darwin*)
+                if ! command -v brew &> /dev/null; then
+                    error "Homebrew is required but not installed. Please install Homebrew first."
+                fi
                 brew install git
                 ;;
             linux-gnu*)
@@ -83,67 +169,139 @@ check_git() {
     fi
 }
 
-# Configure SSH key
-setup_ssh() {
-    # Prompt for SSH key path with default
-    read -p "Please provide the path to your SSH key [~/.ssh/id_rsa]: " SSH_KEY_PATH
-    SSH_KEY_PATH=${SSH_KEY_PATH:-"$HOME/.ssh/id_rsa"}
-
-    # Expand tilde to home directory
-    SSH_KEY_PATH="${SSH_KEY_PATH/#\~/$HOME}"
-
-    if [ ! -f "$SSH_KEY_PATH" ]; then
-        log "No SSH key found at $SSH_KEY_PATH"
-        read -p "Would you like to generate a new SSH key? [Y/n] " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]] || [ -z "$REPLY" ]; then
-            read -p "Enter your email address: " EMAIL
-            if [ -z "$EMAIL" ]; then
-                error "Email address is required for SSH key generation"
-            fi
-            ssh-keygen -t ed25519 -C "$EMAIL" -f "$SSH_KEY_PATH"
-            log "SSH key generated at $SSH_KEY_PATH"
-        else
-            warn "Skipping SSH key generation"
-        fi
-    else
-        log "Using existing SSH key at $SSH_KEY_PATH"
+# Install npm dependencies
+install_dependencies() {
+    log "Installing required dependencies using Bun..."
+    
+    # Verify package.json exists
+    if [ ! -f "$SCRIPT_DIR/package.json" ]; then
+        error "package.json not found. Make sure it's in the same directory as the install script."
     fi
-
-    if [ -f "$SSH_KEY_PATH.pub" ]; then
-        log "Please add the following SSH key to your GitHub account:"
-        echo
-        cat "$SSH_KEY_PATH.pub"
-        echo
-        log "Add this key at: https://github.com/settings/keys"
-        read -p "Press Enter once you've added the key to GitHub..."
+    
+    # Install dependencies
+    cd "$SCRIPT_DIR"
+    bun install
+    
+    # Check if installation was successful
+    if [ $? -eq 0 ]; then
+        log "Dependencies installed successfully"
+    else
+        error "Failed to install dependencies"
     fi
 }
 
-# Set up git-who command
-setup_git_who() {
-    log "Setting up Git alias 'who'..."
-    ALIAS_COMMAND="!node \"$APP_PATH\" \"\$@\";"
-    git config --global alias.who "$ALIAS_COMMAND"
-
-    # Verify the installation
-    if git config --global --get alias.who > /dev/null; then
-        log "Git alias 'who' configured successfully"
+# Build the TypeScript files into native executables
+build_executables() {
+    log "Building native executables with Bun..."
+    cd "$SCRIPT_DIR"
+    bun run build
+    
+    # Check if build was successful
+    if [ $? -eq 0 ] && [ -f "$SCRIPT_DIR/who" ] && [ -f "$SCRIPT_DIR/tags" ]; then
+        log "Executables built successfully"
     else
-        error "Failed to configure git alias 'who'"
+        error "Failed to build executables"
     fi
+}
+
+# Install executables to project's tmp directory
+install_executables() {
+    log "Installing executables to project's tmp directory..."
+
+    # TMP_DIR is already set in the main function based on repo root
+    if [ ! -d "$TMP_DIR" ]; then
+        mkdir -p "$TMP_DIR"
+        log "Created tmp directory at $TMP_DIR"
+    fi
+    
+    # Copy executables
+    cp "$SCRIPT_DIR/who" "$TMP_DIR/who"
+    cp "$SCRIPT_DIR/tags" "$TMP_DIR/tags"
+    
+    # Make them executable
+    chmod +x "$TMP_DIR/who"
+    chmod +x "$TMP_DIR/tags"
+    
+    log "Executables installed successfully to $TMP_DIR"
+    
+    # Provide instructions for adding to PATH temporarily
+    echo ""
+    echo "To use these commands from anywhere, you can temporarily add the tmp directory to your PATH:"
+    echo ""
+    echo "  export PATH=\"$TMP_DIR:\$PATH\""
+    echo ""
+    echo "Or you can run them directly using:"
+    echo ""
+    echo "  $TMP_DIR/who"
+    echo "  $TMP_DIR/tags"
+    echo ""
+}
+
+# Setup Git aliases
+setup_git_aliases() {
+    log "Setting up Git aliases..."
+    
+    # Get absolute paths to executables
+    WHO_PATH="$TMP_DIR/who"
+    TAGS_PATH="$TMP_DIR/tags"
+    
+    # Configure Git aliases with proper argument passing and help handling
+    git config --global alias.who "!f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$WHO_PATH\" --help; else \"$WHO_PATH\" \"\$@\"; fi }; f"
+    git config --global alias.tags "!f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$TAGS_PATH\" --help; else \"$TAGS_PATH\" \"\$@\"; fi }; f"
+    
+    # Verify the aliases were set up correctly
+    if git config --global --get alias.who > /dev/null && git config --global --get alias.tags > /dev/null; then
+        log "Git aliases configured successfully"
+        
+        # Show what was added to .gitconfig
+        log "The following has been added to your .gitconfig file:"
+        echo "[alias]"
+        echo "    who = !f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$WHO_PATH\" --help; else \"$WHO_PATH\" \"\$@\"; fi }; f"
+        echo "    tags = !f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$TAGS_PATH\" --help; else \"$TAGS_PATH\" \"\$@\"; fi }; f"
+    else
+        error "Failed to configure Git aliases"
+    fi
+    
+    log "You can now use 'git who' and 'git tags' commands"
 }
 
 # Main installation process
 main() {
-    check_nodejs
+    # First check for GitHub CLI
+    check_gh_cli
+    
+    # Determine repository root directory (for Git)
+    if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+        REPO_ROOT=$(git rev-parse --show-toplevel)
+        log "Git repository detected at: $REPO_ROOT"
+        
+        # If script is not in the repo root, adjust paths accordingly
+        if [ "$SCRIPT_DIR" != "$REPO_ROOT" ]; then
+            log "Script is running from a subdirectory of the repository"
+            # Keep SCRIPT_DIR as-is for script location
+        fi
+    else
+        # Not in a git repository, use script directory
+        REPO_ROOT="$SCRIPT_DIR"
+        log "Not in a Git repository, using script directory as root"
+    fi
+
+    # Use REPO_ROOT to define TMP_DIR
+    TMP_DIR="$REPO_ROOT/tmp"
+    
+    check_bun
     check_git
-    setup_ssh
-    setup_git_who
+    install_dependencies
+    build_executables
+    install_executables
+    setup_git_aliases
+
+    # cleanup bun build binary logs
+    find . -name "*.bun-build" -type f -delete
 
     log "Installation completed successfully!"
-    log "You can now use 'git who' to view logs interactively"
-    log "For help, run 'git who --help'"
+    log "You can now use 'git who' and 'git tags' commands"
+    log "For help, run 'git who --help' or 'git tags --help'"
 }
 
 # Run the installation
