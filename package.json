@@ -1,19 +1,24 @@
 {
-  "name": "git-addons",
-  "version": "0.0.1",
-  "description": "A simple CLI script to help me extend on top of already pre-existing git commands",
-  "main": "app.js",
-  "author": "shadmeoli",
-  "license": "MIT",
-  "private": true,
+  "name": "git-tools",
+  "version": "1.0.0",
+  "description": "Custom Git tools built with TypeScript and Bun",
   "type": "module",
   "scripts": {
-    "dev": "node app.js"
+    "build": "bun build ./who.ts --compile --outfile who && bun build ./labels.ts --compile --outfile labels",
+    "build:who": "bun build ./who.ts --compile --outfile who",
+    "build:labels": "bun build ./labels.ts --compile --outfile labels",
+    "dev:who": "bun who.ts",
+    "dev:labels": "bun labels.ts"
   },
   "dependencies": {
-    "chalk": "^5.4.1",
-    "cli-table3": "^0.6.5",
-    "inquirer": "^12.3.1",
-    "ora": "^8.1.1"
+    "cli-table3": "^0.6.3",
+    "inquirer": "^9.2.11",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.6",
+    "@types/node": "^20.8.6",
+    "bun-types": "latest",
+    "typescript": "^5.2.2"
   }
 }

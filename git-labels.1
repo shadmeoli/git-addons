@@ -1,0 +1,28 @@
+.TH GIT-LABELS 1 "April 2025" "git-labels 1.0" "Git Manual"
+.SH NAME
+git-labels \- List Git tags as labels from a repository
+.SH SYNOPSIS
+.B git labels
+\fI<repo-name>\fR
+.SH DESCRIPTION
+\fBgit-labels\fR fetches and displays Git tags as labels from a specified repository.
+This tool provides a convenient interface for visualizing repository tags in a structured format.
+.SH OPTIONS
+.TP
+\fI<repo-name>\fR
+Specify the repository to fetch labels from. This can be a local path (e.g., ".") or a remote repository URL.
+.TP
+\fB\-\-help\fR
+Display help information.
+.SH EXAMPLES
+.TP
+List labels from the current repository:
+\fBgit labels .\fR
+.TP
+List labels from a remote repository:
+\fBgit labels https://github.com/user/repo.git\fR
+.SH IMPLEMENTATION NOTES
+While the command is named "labels", it fetches Git tags internally and presents them as labels.
+This provides a more user-friendly way of thinking about repository release points.
+.SH SEE ALSO
+\fBgit-who\fR(1)

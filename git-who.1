@@ -1,0 +1,35 @@
+.TH GIT-WHO 1 "April 2025" "git-who 1.0" "Git Manual"
+.SH NAME
+git-who \- View Git logs based on author and time range
+.SH SYNOPSIS
+.B git who
+[\fIauthor_name\fR] [\fB\-\-t\fR] [\fB\-\-T\fR]
+.SH DESCRIPTION
+\fBgit-who\fR displays Git logs filtered by author and time range. 
+
+Without arguments, it shows logs for the current user from the past week.
+.SH OPTIONS
+.TP
+\fB\-\-t\fR
+Enable interactive mode to select an author from the contributors.
+.TP
+\fB\-\-T\fR
+Enable interactive time selection (choose from options like "1 week ago", "1 month ago", etc.).
+.TP
+\fB\-\-help\fR
+Display help information.
+.SH EXAMPLES
+.TP
+View the logs of the current user in the last week:
+\fBgit who\fR
+.TP
+View the logs for a specific author in the last week:
+\fBgit who "Author Name"\fR
+.TP
+Interactive mode to select an author:
+\fBgit who --t\fR
+.TP
+Interactive mode to select an author and a time range:
+\fBgit who --t --T\fR
+.SH SEE ALSO
+\fBgit-labels\fR(1)
