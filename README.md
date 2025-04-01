@@ -16,8 +16,6 @@ A powerful tool to view Git logs based on author and time range with a clean, ea
 git who [author_name] [--t] [--T]
 ```
 
-![git who screenshot](./assets/Screenshot.png)
-
 **Features:**
 
 - View logs for the current user (default) or a specified author
@@ -33,15 +31,13 @@ A simple tool to fetch and display Git tags from repositories.
 git tags <repo-name>
 ```
 
-![git tags screenshot](./assets/git-tags-screenshot.png)
-
 **Features:**
 
-- 🔍 List tags from the current repository or a remote repository
-- 📋 Displays tags in a clean, formatted table
-- 🔄 Fetches tags directly without needing to clone repositories
+- List tags from the current repository or a remote repository
+- Displays tags in a clean, formatted table
+- Fetches tags directly without needing to clone repositories
 
-## 🚀 Installation
+## Installation
 
 ### Prerequisites
 
