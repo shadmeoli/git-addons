@@ -23,19 +23,19 @@ git who [author_name] [--t] [--T]
 - Interactive time range selection with `--T` flag
 - Displays commit details in a formatted table
 
-### `git tags`
+### `git lables`
 
-A simple tool to fetch and display Git tags from repositories.
+A simple tool to fetch and display Git lables from repositories.
 
 ```bash
-git tags <repo-name>
+git lables <repo-name>
 ```
 
 **Features:**
 
-- List tags from the current repository or a remote repository
-- Displays tags in a clean, formatted table
-- Fetches tags directly without needing to clone repositories
+- List lables from the current repository or a remote repository
+- Displays lables in a clean, formatted table
+- Fetches lables directly without needing to clone repositories
 
 ## Installation
 
@@ -87,17 +87,17 @@ git who --t --T
 git who --help
 ```
 
-### `git tags`
+### `git lables`
 
 ```bash
-# List tags from the current repository
-git tags .
+# List lables from the current repository
+git lables .
 
-# List tags from a remote repository
-git tags https://github.com/user/repo.git
+# List lables from a remote repository
+git lables https://github.com/user/repo.git
 
 # Show help
-git tags --help
+git lables --help
 ```
 
 ## 📖 Documentation
@@ -115,7 +115,7 @@ After installing the man pages, you can access them with:
 
 ```bash
 man git-who
-man git-tags
+man git-lables
 ```
 
 ## 🛠️ Development
@@ -132,7 +132,7 @@ bun install
 ```bash
 # Run in development mode
 bun run dev:who
-bun run dev:tags
+bun run dev:lables
 
 # Build tools
 bun run build
@@ -145,11 +145,11 @@ bun run build
 ├── install.sh            # Main installation script
 ├── install-man-pages.sh  # Man pages installation script
 ├── who.ts                # Source for git-who tool
-├── tags.ts               # Source for git-tags tool
+├── lables.ts               # Source for git-lables tool
 ├── package.json          # Dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
 ├── git-who.1             # Man page for git-who
-├── git-tags.1            # Man page for git-tags
+├── git-lables.1            # Man page for git-lables
 └── tmp/                  # Directory for compiled binaries
 ```
 
@@ -185,7 +185,7 @@ If you encounter this issue when running `git who --help`, there are two solutio
 If you get permission errors when running the tools:
 
 ```bash
-chmod +x tmp/who tmp/tags
+chmod +x tmp/who tmp/lables
 ```
 
 ## 🤝 Contributing

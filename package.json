@@ -4,11 +4,11 @@
   "description": "Custom Git tools built with TypeScript and Bun",
   "type": "module",
   "scripts": {
-    "build": "bun build ./who.ts --compile --outfile who && bun build ./tags.ts --compile --outfile tags",
+    "build": "bun build ./who.ts --compile --outfile who && bun build ./lables.ts --compile --outfile lables",
     "build:who": "bun build ./who.ts --compile --outfile who",
-    "build:tags": "bun build ./tags.ts --compile --outfile tags",
+    "build:lables": "bun build ./lables.ts --compile --outfile lables",
     "dev:who": "bun who.ts",
-    "dev:tags": "bun tags.ts"
+    "dev:lables": "bun lables.ts"
   },
   "dependencies": {
     "cli-table3": "^0.6.3",
