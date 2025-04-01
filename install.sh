@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installation script for git-who and git-lables tools with Bun
+# Installation script for git-who and git-labels tools with Bun
 
 set -e  # Exit on error
 set -u  # Exit on undefined variable
@@ -102,15 +102,15 @@ check_gh_cli() {
 # Get the absolute path of the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WHO_TS_PATH="$SCRIPT_DIR/who.ts"
-lables_TS_PATH="$SCRIPT_DIR/lables.ts"
+labels_TS_PATH="$SCRIPT_DIR/labels.ts"
 
 # Verify scripts exist
 if [ ! -f "$WHO_TS_PATH" ]; then
     error "'who.ts' script not found at $WHO_TS_PATH"
 fi
 
-if [ ! -f "$lables_TS_PATH" ]; then
-    error "'lables.ts' script not found at $lables_TS_PATH"
+if [ ! -f "$labels_TS_PATH" ]; then
+    error "'labels.ts' script not found at $labels_TS_PATH"
 fi
 
 log "Starting installation of Git tools..."
@@ -197,7 +197,7 @@ build_executables() {
     bun run build
     
     # Check if build was successful
-    if [ $? -eq 0 ] && [ -f "$SCRIPT_DIR/who" ] && [ -f "$SCRIPT_DIR/lables" ]; then
+    if [ $? -eq 0 ] && [ -f "$SCRIPT_DIR/who" ] && [ -f "$SCRIPT_DIR/labels" ]; then
         log "Executables built successfully"
     else
         error "Failed to build executables"
@@ -216,11 +216,11 @@ install_executables() {
     
     # Copy executables
     cp "$SCRIPT_DIR/who" "$TMP_DIR/who"
-    cp "$SCRIPT_DIR/lables" "$TMP_DIR/lables"
+    cp "$SCRIPT_DIR/labels" "$TMP_DIR/labels"
     
     # Make them executable
     chmod +x "$TMP_DIR/who"
-    chmod +x "$TMP_DIR/lables"
+    chmod +x "$TMP_DIR/labels"
     
     log "Executables installed successfully to $TMP_DIR"
     
@@ -233,7 +233,7 @@ install_executables() {
     echo "Or you can run them directly using:"
     echo ""
     echo "  $TMP_DIR/who"
-    echo "  $TMP_DIR/lables"
+    echo "  $TMP_DIR/labels"
     echo ""
 }
 
@@ -243,26 +243,26 @@ setup_git_aliases() {
     
     # Get absolute paths to executables
     WHO_PATH="$TMP_DIR/who"
-    lables_PATH="$TMP_DIR/lables"
+    labels_PATH="$TMP_DIR/labels"
     
     # Configure Git aliases with proper argument passing and help handling
     git config --global alias.who "!f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$WHO_PATH\" --help; else \"$WHO_PATH\" \"\$@\"; fi }; f"
-    git config --global alias.lables "!f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$lables_PATH\" --help; else \"$lables_PATH\" \"\$@\"; fi }; f"
+    git config --global alias.labels "!f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$labels_PATH\" --help; else \"$labels_PATH\" \"\$@\"; fi }; f"
     
     # Verify the aliases were set up correctly
-    if git config --global --get alias.who > /dev/null && git config --global --get alias.lables > /dev/null; then
+    if git config --global --get alias.who > /dev/null && git config --global --get alias.labels > /dev/null; then
         log "Git aliases configured successfully"
         
         # Show what was added to .gitconfig
         log "The following has been added to your .gitconfig file:"
         echo "[alias]"
         echo "    who = !f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$WHO_PATH\" --help; else \"$WHO_PATH\" \"\$@\"; fi }; f"
-        echo "    lables = !f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$lables_PATH\" --help; else \"$lables_PATH\" \"\$@\"; fi }; f"
+        echo "    labels = !f() { if [ \"\$1\" = \"--help\" ] || [ \"\$1\" = \"-h\" ]; then \"$labels_PATH\" --help; else \"$labels_PATH\" \"\$@\"; fi }; f"
     else
         error "Failed to configure Git aliases"
     fi
     
-    log "You can now use 'git who' and 'git lables' commands"
+    log "You can now use 'git who' and 'git labels' commands"
 }
 
 # Main installation process
@@ -300,8 +300,8 @@ main() {
     find . -name "*.bun-build" -type f -delete
 
     log "Installation completed successfully!"
-    log "You can now use 'git who' and 'git lables' commands"
-    log "For help, run 'git who --help' or 'git lables --help'"
+    log "You can now use 'git who' and 'git labels' commands"
+    log "For help, run 'git who --help' or 'git labels --help'"
 }
 
 # Run the installation

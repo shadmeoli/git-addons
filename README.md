@@ -23,19 +23,19 @@ git who [author_name] [--t] [--T]
 - Interactive time range selection with `--T` flag
 - Displays commit details in a formatted table
 
-### `git lables`
+### `git labels`
 
-A simple tool to fetch and display Git lables from repositories.
+A simple tool to fetch and display Git labels from repositories.
 
 ```bash
-git lables <repo-name>
+git labels <repo-name>
 ```
 
 **Features:**
 
-- List lables from the current repository or a remote repository
-- Displays lables in a clean, formatted table
-- Fetches lables directly without needing to clone repositories
+- List labels from the current repository or a remote repository
+- Displays labels in a clean, formatted table
+- Fetches labels directly without needing to clone repositories
 
 ## Installation
 
@@ -87,17 +87,17 @@ git who --t --T
 git who --help
 ```
 
-### `git lables`
+### `git labels`
 
 ```bash
-# List lables from the current repository
-git lables .
+# List labels from the current repository
+git labels .
 
-# List lables from a remote repository
-git lables https://github.com/user/repo.git
+# List labels from a remote repository
+git labels https://github.com/user/repo.git
 
 # Show help
-git lables --help
+git labels --help
 ```
 
 ## 📖 Documentation
@@ -115,7 +115,7 @@ After installing the man pages, you can access them with:
 
 ```bash
 man git-who
-man git-lables
+man git-labels
 ```
 
 ## 🛠️ Development
@@ -132,7 +132,7 @@ bun install
 ```bash
 # Run in development mode
 bun run dev:who
-bun run dev:lables
+bun run dev:labels
 
 # Build tools
 bun run build
@@ -145,11 +145,11 @@ bun run build
 ├── install.sh            # Main installation script
 ├── install-man-pages.sh  # Man pages installation script
 ├── who.ts                # Source for git-who tool
-├── lables.ts               # Source for git-lables tool
+├── labels.ts               # Source for git-labels tool
 ├── package.json          # Dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
 ├── git-who.1             # Man page for git-who
-├── git-lables.1            # Man page for git-lables
+├── git-labels.1            # Man page for git-labels
 └── tmp/                  # Directory for compiled binaries
 ```
 
@@ -185,7 +185,7 @@ If you encounter this issue when running `git who --help`, there are two solutio
 If you get permission errors when running the tools:
 
 ```bash
-chmod +x tmp/who tmp/lables
+chmod +x tmp/who tmp/labels
 ```
 
 ## 🤝 Contributing

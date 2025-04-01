@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to install man pages for git-who and git-lables
+# Script to install man pages for git-who and git-labels
 
 set -e  # Exit on error
 
@@ -28,14 +28,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Check if man page files exist
 WHO_MAN="$SCRIPT_DIR/git-who.1"
-lables_MAN="$SCRIPT_DIR/git-lables.1"
+labels_MAN="$SCRIPT_DIR/git-labels.1"
 
 if [ ! -f "$WHO_MAN" ]; then
     error "git-who.1 not found. Make sure it's in the same directory as this script."
 fi
 
-if [ ! -f "$lables_MAN" ]; then
-    error "git-lables.1 not found. Make sure it's in the same directory as this script."
+if [ ! -f "$labels_MAN" ]; then
+    error "git-labels.1 not found. Make sure it's in the same directory as this script."
 fi
 
 log "Starting installation of man pages..."
@@ -74,7 +74,7 @@ if [ "$INSTALL_GLOBAL" = true ]; then
     # Copy files
     if command -v sudo &> /dev/null; then
         sudo cp "$WHO_MAN" /usr/local/share/man/man1/
-        sudo cp "$lables_MAN" /usr/local/share/man/man1/
+        sudo cp "$labels_MAN" /usr/local/share/man/man1/
         
         # Update man database
         if command -v mandb &> /dev/null; then
@@ -85,7 +85,7 @@ if [ "$INSTALL_GLOBAL" = true ]; then
         fi
     else
         cp "$WHO_MAN" /usr/local/share/man/man1/
-        cp "$lables_MAN" /usr/local/share/man/man1/
+        cp "$labels_MAN" /usr/local/share/man/man1/
         
         # Update man database
         if command -v mandb &> /dev/null; then
@@ -109,7 +109,7 @@ else
     
     # Copy files
     cp "$WHO_MAN" "$USER_MAN_DIR/"
-    cp "$lables_MAN" "$USER_MAN_DIR/"
+    cp "$labels_MAN" "$USER_MAN_DIR/"
     
     # Update MANPATH if needed
     if [[ ":$MANPATH:" != *":$HOME/.local/share/man:"* ]]; then
