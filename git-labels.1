@@ -1,28 +1,54 @@
 .TH GIT-LABELS 1 "April 2025" "git-labels 1.0" "Git Manual"
 .SH NAME
-git-labels \- List Git tags as labels from a repository
+git-labels \- Manage and list labels in a Git repository
 .SH SYNOPSIS
 .B git labels
-\fI<repo-name>\fR
+[\fICOMMAND\fR] [\fIOPTIONS\fR]
 .SH DESCRIPTION
-\fBgit-labels\fR fetches and displays Git tags as labels from a specified repository.
-This tool provides a convenient interface for visualizing repository tags in a structured format.
+.B git-labels
+is a versatile tool for managing and listing labels in Git repositories. It provides 
+functionality to create default GitHub labels, list repository tags, and manage 
+repository label configurations.
+.SH COMMANDS
+.TP
+\fB.\fR
+Create a set of predefined default labels in the current repository. This command 
+requires the GitHub CLI (\fBgh\fR) to be installed and authenticated.
+.TP
+\fBlist\fR
+List tags in the current repository. Presents repository tags in a structured format.
+.TP
+\fI<repo-name>\fR
+Fetch and display tags from a specified repository. This can be a local path or a 
+remote repository URL.
 .SH OPTIONS
 .TP
-\fI<repo-name>\fR
-Specify the repository to fetch labels from. This can be a local path (e.g., ".") or a remote repository URL.
-.TP
 \fB\-\-help\fR
-Display help information.
+Display comprehensive help information about the \fBgit-labels\fR command.
 .SH EXAMPLES
 .TP
-List labels from the current repository:
+Create default labels in the current repository:
 \fBgit labels .\fR
+.TP
+List tags in the current repository:
+\fBgit labels list\fR
 .TP
 List labels from a remote repository:
 \fBgit labels https://github.com/user/repo.git\fR
+.SH REQUIREMENTS
+.IP \[bu] 2
+GitHub CLI (\fBgh\fR) must be installed
+.IP \[bu] 2
+User must be authenticated with GitHub CLI
+.IP \[bu] 2
+Must be inside a Git repository when using repository-specific commands
 .SH IMPLEMENTATION NOTES
-While the command is named "labels", it fetches Git tags internally and presents them as labels.
-This provides a more user-friendly way of thinking about repository release points.
+The tool leverages Git and GitHub CLI to provide a streamlined interface for 
+repository label management. The default label set includes common GitHub 
+issue and pull request labels such as "bug fix", "enhancement", and "documentation".
+.SH BUGS
+Report bugs at the project's GitHub repository issue tracker.
+.SH AUTHOR
+Written by your development team.
 .SH SEE ALSO
-\fBgit-who\fR(1)
+\fBgit\fR(1), \fBgh\fR(1)
