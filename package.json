@@ -11,9 +11,10 @@
     "dev:labels": "bun labels.ts"
   },
   "dependencies": {
-    "cli-table3": "^0.6.3",
-    "inquirer": "^9.2.11",
-    "ora": "^7.0.1"
+    "chalk": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "inquirer": "^12.5.2",
+    "ora": "^8.2.0"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.6",

@@ -1,0 +1,103 @@
+.TH GIT-TAG 1 "April 2025" "git-tag 1.0" "Git Manual"
+.SH NAME
+git-tag \- Interactive Git tag creation and management tool
+.SH SYNOPSIS
+.B git tag
+.SH DESCRIPTION
+.B git-tag
+is an interactive command-line tool designed to simplify the process of creating 
+and managing Git tags. It provides a user-friendly, step-by-step interface for 
+creating annotated tags with version numbers and descriptions.
+.SH FEATURES
+.IP \[bu] 2
+Automatic version suggestion based on the latest existing tag
+.IP \[bu] 2
+Interactive version input with validation
+.IP \[bu] 2
+Ability to add a descriptive message for the tag
+.IP \[bu] 2
+Confirmation step before tag creation
+.IP \[bu] 2
+Display of all tags with the newly created tag highlighted
+.SH WORKFLOW
+When invoked, the tool guides the user through the following steps:
+.RS
+.IP 1. 2
+Version Selection
+.RS
+.IP \[bu] 2
+Suggests the next semantic version based on the latest tag
+.IP \[bu] 2
+Allows manual version input
+.IP \[bu] 2
+Validates version format (x.y.z)
+.RE
+.IP 2. 2
+Description Entry
+.RS
+.IP \[bu] 2
+Prompts for a tag description
+.IP \[bu] 2
+Provides a default description if none is specified
+.RE
+.IP 3. 2
+Confirmation
+.RS
+.IP \[bu] 2
+Asks for confirmation before creating the tag
+.IP \[bu] 2
+Option to cancel tag creation
+.RE
+.IP 4. 2
+Tag Display
+.RS
+.IP \[bu] 2
+Shows all repository tags
+.IP \[bu] 2
+Highlights the newly created tag in green
+.RE
+.RE
+.SH REQUIREMENTS
+.IP \[bu] 2
+Must be run inside a Git repository
+.IP \[bu] 2
+Requires Bun runtime
+.IP \[bu] 2
+Requires following npm packages:
+.RS
+.IP \[bu] 2
+inquirer
+.IP \[bu] 2
+chalk
+.IP \[bu] 2
+ora
+.IP \[bu] 2
+cli-table3
+.RE
+.SH EXAMPLES
+.TP
+Create a new tag interactively:
+.B git tag
+.PP
+Example interaction:
+.RS
+.nf
+Enter the version for the new tag: (1.2.2)
+Enter a description for this tag/release: Bug fixes and performance improvements
+Do you want to create this tag? (Y/n)
+.fi
+.RE
+.SH NOTES
+.IP \[bu] 2
+The tool automatically prefixes tags with 'v'
+.IP \[bu] 2
+By default, it increments the patch version of the latest tag
+.IP \[bu] 2
+Optionally pushes the tag to the remote repository
+.SH BUGS
+Report bugs at the project's GitHub repository issue tracker.
+.SH AUTHOR
+Written by your development team.
+.SH SEE ALSO
+.BR git (1),
+.BR git-tag (1)

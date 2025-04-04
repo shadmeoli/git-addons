@@ -29,6 +29,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Check if man page files exist
 WHO_MAN="$SCRIPT_DIR/git-who.1"
 LABELS_MAN="$SCRIPT_DIR/git-labels.1"
+TAGS_MAN="$SCRIPT_DIR/git-tags.1"
 
 if [ ! -f "$WHO_MAN" ]; then
     error "git-who.1 not found. Make sure it's in the same directory as this script."
@@ -37,6 +38,11 @@ fi
 if [ ! -f "$LABELS_MAN" ]; then
     error "git-labels.1 not found. Make sure it's in the same directory as this script."
 fi
+
+if [ ! -f "$TAGS_MAN" ]; then
+    error "git-tags.1 not found. Make sure it's in the same directory as this script."
+fi
+
 
 log "Starting installation of man pages..."
 
@@ -135,6 +141,7 @@ if [ "$INSTALL_GLOBAL" = true ]; then
     else
         cp "$WHO_MAN" /usr/local/share/man/man1/
         cp "$LABELS_MAN" /usr/local/share/man/man1/
+        cp "$TAGS_MAN" /usr/local/share/man/man1/
         
         # Update man database
         if command -v mandb &> /dev/null; then

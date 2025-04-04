@@ -188,13 +188,96 @@ If you get permission errors when running the tools:
 chmod +x tmp/who tmp/labels
 ```
 
+---
+
+# Git Tag Interactive Tool
+
+## Overview
+
+An interactive Git tag creation tool that simplifies the process of creating and managing Git tags.
+
+## Features
+
+- Interactive version selection
+- Automatic version suggestion
+- Descriptive tag messages
+- Tag creation confirmation
+- Comprehensive tag display
+
+## Requirements
+
+- Bun runtime
+- Git
+- Node.js (for npm packages)
+
+## Installation
+
+### Quick Install
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd <repo-directory>
+
+# Install dependencies
+bun install
+
+# Run installation script
+chmod +x install.sh
+sudo ./install.sh
+```
+
+### Manual Installation
+
+```bash
+# Install dependencies
+bun install inquirer chalk ora cli-table3
+
+# Copy script to bin directory
+sudo cp tag.ts /usr/local/bin/git-tag
+sudo chmod +x /usr/local/bin/git-tag
+
+# Install man page
+sudo cp git-tag.1 /usr/share/man/man1/
+sudo gzip /usr/share/man/man1/git-tag.1
+```
+
+## Uninstallation
+
+```bash
+# Run uninstall script
+sudo ./uninstall.sh
+
+# Or manually remove
+sudo rm /usr/local/bin/git-tag
+sudo rm /usr/share/man/man1/git-tag.1.gz
+```
+
+## Usage
+
+Simply run:
+
+```bash
+git tag
+```
+
+Follow the interactive prompts to create a new tag.
+
+## Uninstall
+
+> To uninstall the scripts just edit your .gitconfig file
+
+```sh
+nvim ~/.gitconfig
+```
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+3. Commit your changes (`git commit -m 'feature: Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
