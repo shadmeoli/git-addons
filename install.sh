@@ -103,6 +103,7 @@ check_gh_cli() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WHO_TS_PATH="$SCRIPT_DIR/who.ts"
 LABELS_TS_PATH="$SCRIPT_DIR/labels.ts"
+PR_TS_PATH="$SCRIPT_DIR/pr.ts"
 
 # Verify scripts exist
 if [ ! -f "$WHO_TS_PATH" ]; then
@@ -111,6 +112,10 @@ fi
 
 if [ ! -f "$LABELS_TS_PATH" ]; then
     error "'labels.ts' script not found at $LABELS_TS_PATH"
+fi
+
+if [ ! -f "$PR_TS_PATH" ]; then
+    error "'pr.ts' script not found at $PR_TS_PATH"
 fi
 
 log "Starting installation of Git tools..."
@@ -197,7 +202,7 @@ build_executables() {
     bun run build
     
     # Check if build was successful
-    if [ $? -eq 0 ] && [ -f "$SCRIPT_DIR/who" ] && [ -f "$SCRIPT_DIR/labels" ]; then
+    if [ $? -eq 0 ] && [ -f "$SCRIPT_DIR/who" ] && [ -f "$SCRIPT_DIR/labels" ] && [ -f "$SCRIPT_DIR/pr" ]; then
         log "Executables built successfully"
     else
         error "Failed to build executables"
@@ -217,10 +222,12 @@ install_executables() {
     # Copy executables
     cp "$SCRIPT_DIR/who" "$TMP_DIR/who"
     cp "$SCRIPT_DIR/labels" "$TMP_DIR/labels"
+    cp "$SCRIPT_DIR/pr" "$TMP_DIR/pr"
     
     # Make them executable
     chmod +x "$TMP_DIR/who"
     chmod +x "$TMP_DIR/labels"
+    chmod +x "$TMP_DIR/pr"
     
     log "Executables installed successfully to $TMP_DIR"
     
@@ -234,6 +241,7 @@ install_executables() {
     echo ""
     echo "  $TMP_DIR/who"
     echo "  $TMP_DIR/labels"
+    echo "  $TMP_DIR/pr"
     echo ""
 }
 
@@ -268,6 +276,17 @@ else
 fi
 EOL
     chmod +x "$WRAPPER_DIR/git-labels-wrapper.sh"
+    
+    # Create wrapper for pr
+    cat > "$WRAPPER_DIR/git-pr-wrapper.sh" << EOL
+#!/bin/bash
+if [ "\$1" = "--help" ] || [ "\$1" = "-h" ]; then
+  "$TMP_DIR/pr" --help
+else
+  "$TMP_DIR/pr" "\$@"
+fi
+EOL
+    chmod +x "$WRAPPER_DIR/git-pr-wrapper.sh"
     
     log "Wrapper scripts created successfully"
 }
