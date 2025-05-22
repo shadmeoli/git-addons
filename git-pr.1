@@ -1,1 +1,59 @@
- 
+.TH GIT-PR 1 "2024" "git-pr" "Git PR Manual"
+.SH NAME
+git-pr \- Interactive GitHub PR creation tool
+.SH SYNOPSIS
+.B git pr
+[\-\-help]
+[\-\-preview]
+.SH DESCRIPTION
+.B git pr
+is an interactive command-line tool that helps create GitHub pull requests by prompting for title, body, assignee, and labels.
+.PP
+The tool uses the GitHub CLI (gh) to fetch repository collaborators and labels, and to create the pull request.
+.SH OPTIONS
+.TP
+.B \-\-help
+Display help information and exit.
+.TP
+.B \-\-preview
+Preview the command before execution and ask for confirmation.
+.SH INTERACTIVE PROMPTS
+The tool will guide you through the following steps:
+.PP
+.IP \(bu 3
+Enter a title for the pull request
+.IP \(bu 3
+Enter a description for the pull request (opens in your default editor)
+.IP \(bu 3
+Select a base branch (the branch to merge into)
+.IP \(bu 3
+Select a head branch (the branch with your changes)
+.IP \(bu 3
+Select an assignee from repository collaborators
+.IP \(bu 3
+Select labels for the pull request (multiple can be selected)
+.SH REQUIREMENTS
+.IP \(bu 3
+GitHub CLI (gh) must be installed and authenticated
+.IP \(bu 3
+You must be in a Git repository connected to GitHub
+.SH EXAMPLES
+.PP
+.B Create a pull request with interactive prompts:
+.PP
+.RS
+git pr
+.RE
+.PP
+.B Create a pull request with command preview:
+.PP
+.RS
+git pr --preview
+.RE
+.SH SEE ALSO
+.BR git (1),
+.BR gh (1)
+.SH AUTHOR
+This manual page was written for the git-tools package.
+.SH BUGS
+Report bugs to the GitHub repository. 
