@@ -30,6 +30,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WHO_MAN="$SCRIPT_DIR/git-who.1"
 LABELS_MAN="$SCRIPT_DIR/git-labels.1"
 TAGS_MAN="$SCRIPT_DIR/git-tags.1"
+PR_MAN="$SCRIPT_DIR/git-pr.1"
 
 if [ ! -f "$WHO_MAN" ]; then
     error "git-who.1 not found. Make sure it's in the same directory as this script."
@@ -41,6 +42,10 @@ fi
 
 if [ ! -f "$TAGS_MAN" ]; then
     error "git-tags.1 not found. Make sure it's in the same directory as this script."
+fi
+
+if [ ! -f "$PR_MAN" ]; then
+    error "git-pr.1 not found. Make sure it's in the same directory as this script."
 fi
 
 
@@ -92,6 +97,14 @@ EOL
 EOL
     chmod +x "$BIN_DIR/git-labels"
     
+    # Create git-pr command
+    cat > "$BIN_DIR/git-pr" << EOL
+#!/bin/bash
+# Git PR command
+"$TMP_DIR/pr" "\$@"
+EOL
+    chmod +x "$BIN_DIR/git-pr"
+    
     log "Git command scripts created in $BIN_DIR"
 }
 
@@ -130,6 +143,7 @@ if [ "$INSTALL_GLOBAL" = true ]; then
     if command -v sudo &> /dev/null; then
         sudo cp "$WHO_MAN" /usr/local/share/man/man1/
         sudo cp "$LABELS_MAN" /usr/local/share/man/man1/
+        sudo cp "$PR_MAN" /usr/local/share/man/man1/
         
         # Update man database
         if command -v mandb &> /dev/null; then
