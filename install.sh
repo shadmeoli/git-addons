@@ -301,13 +301,15 @@ setup_git_aliases() {
     # Get paths to wrapper scripts
     WHO_WRAPPER="$WRAPPER_DIR/git-who-wrapper.sh"
     LABELS_WRAPPER="$WRAPPER_DIR/git-labels-wrapper.sh"
+    PR_WRAPPER="$WRAPPER_DIR/git-pr-wrapper.sh"
     
     # Configure Git aliases with wrapper scripts
     git config --global alias.who "!\"$WHO_WRAPPER\""
     git config --global alias.labels "!\"$LABELS_WRAPPER\""
+    git config --global alias.pr "!\"$PR_WRAPPER\""
     
     # Verify the aliases were set up correctly
-    if git config --global --get alias.who > /dev/null && git config --global --get alias.labels > /dev/null; then
+    if git config --global --get alias.who > /dev/null && git config --global --get alias.labels > /dev/null && git config --global --get alias.pr > /dev/null; then
         log "Git aliases configured successfully"
         
         # Show what was added to .gitconfig
@@ -315,11 +317,12 @@ setup_git_aliases() {
         echo "[alias]"
         echo "    who = !\"$WHO_WRAPPER\""
         echo "    labels = !\"$LABELS_WRAPPER\""
+        echo "    pr = !\"$PR_WRAPPER\""
     else
         error "Failed to configure Git aliases"
     fi
     
-    log "You can now use 'git who' and 'git labels' commands"
+    log "You can now use 'git who', 'git labels', and 'git pr' commands"
 }
 
 # Main installation process
@@ -357,8 +360,8 @@ main() {
     find . -name "*.bun-build" -type f -delete
 
     log "Installation completed successfully!"
-    log "You can now use 'git who' and 'git labels' commands"
-    log "For help, run 'git who --help' or 'git labels --help'"
+    log "You can now use 'git who', 'git labels', and 'git pr' commands"
+    log "For help, run 'git who --help', 'git labels --help', or 'git pr --help'"
 }
 
 # Run the installation

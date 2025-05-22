@@ -37,6 +37,23 @@ git labels <repo-name>
 - Displays labels in a clean, formatted table
 - Fetches labels directly without needing to clone repositories
 
+### `git pr`
+
+An interactive tool for creating GitHub pull requests with ease.
+
+```bash
+git pr [--preview]
+```
+
+**Features:**
+
+- Interactive prompts for PR title and body
+- Fetches and displays repository collaborators for assignee selection
+- Fetches and displays repository labels for multi-selection
+- Interactive branch selection for base and head branches
+- Preview mode to review the PR command before execution
+- Uses the GitHub CLI (gh) for API access and PR creation
+
 ## Installation
 
 ### Prerequisites
@@ -100,6 +117,19 @@ git labels https://github.com/user/repo.git
 git labels --help
 ```
 
+### `git pr`
+
+```bash
+# Create a PR with interactive prompts
+git pr
+
+# Create a PR with command preview
+git pr --preview
+
+# Show help
+git pr --help
+```
+
 ## 📖 Documentation
 
 ### Man Pages
@@ -116,6 +146,7 @@ After installing the man pages, you can access them with:
 ```bash
 man git-who
 man git-labels
+man git-pr
 ```
 
 ## 🛠️ Development
@@ -133,6 +164,7 @@ bun install
 # Run in development mode
 bun run dev:who
 bun run dev:labels
+bun run dev:pr
 
 # Build tools
 bun run build
@@ -145,11 +177,13 @@ bun run build
 ├── install.sh            # Main installation script
 ├── install-man-pages.sh  # Man pages installation script
 ├── who.ts                # Source for git-who tool
-├── labels.ts               # Source for git-labels tool
+├── labels.ts             # Source for git-labels tool
+├── pr.ts                 # Source for git-pr tool
 ├── package.json          # Dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
 ├── git-who.1             # Man page for git-who
-├── git-labels.1            # Man page for git-labels
+├── git-labels.1          # Man page for git-labels
+├── git-pr.1              # Man page for git-pr
 └── tmp/                  # Directory for compiled binaries
 ```
 
@@ -185,7 +219,7 @@ If you encounter this issue when running `git who --help`, there are two solutio
 If you get permission errors when running the tools:
 
 ```bash
-chmod +x tmp/who tmp/labels
+chmod +x tmp/who tmp/labels tmp/pr
 ```
 
 ---
