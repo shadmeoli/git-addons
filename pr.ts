@@ -1,17 +1,19 @@
 #!/usr/bin/env bun
-import { execSync } from "child_process";
+
+import { exec, execSync } from "child_process";
 import inquirer from "inquirer";
 import ora from "ora";
 import chalk from "chalk";
+import { exitCode } from "process";
 
 // Function to display help documentation
 const displayHelp = (): void => {
   console.log(`
   Git PR - Interactive GitHub PR Creation Tool
   ============================================
-  
+
   A tool to interactively create GitHub pull requests using the GitHub CLI.
-  
+
   Usage:
     git pr [--help]
 
@@ -22,13 +24,13 @@ const displayHelp = (): void => {
   Requirements:
     - GitHub CLI (gh) must be installed and authenticated.
     - You must be in a Git repository connected to GitHub.
-    
+
   This tool will guide you through:
     - Entering a PR title and body
     - Selecting an assignee from repository collaborators
     - Selecting labels from available repository labels
     - Optionally selecting base and head branches
-    
+
   For more information, refer to the documentation.
   `);
 };
@@ -43,10 +45,10 @@ const checkGitHubCLI = (): void => {
     execSync("gh auth status", { stdio: "ignore" });
   } catch (error) {
     console.error(
-      chalk.red("Error: GitHub CLI is not installed or not authenticated.")
+      chalk.red("Error: GitHub CLI is not installed or not authenticated."),
     );
     console.log(
-      "Please install GitHub CLI and authenticate with 'gh auth login'."
+      "Please install GitHub CLI and authenticate with 'gh auth login'.",
     );
     process.exit(1);
   }
@@ -63,8 +65,8 @@ const checkGitHubRepo = (): void => {
   } catch (error) {
     console.error(
       chalk.red(
-        "Error: Not in a GitHub repository or gh is not configured properly."
-      )
+        "Error: Not in a GitHub repository or gh is not configured properly.",
+      ),
     );
     process.exit(1);
   }
@@ -76,7 +78,7 @@ const fetchCollaborators = (): string[] => {
     const spinner = ora("Fetching repository collaborators...").start();
 
     const collaboratorsOutput = execSync(
-      "gh api repos/:owner/:repo/collaborators --jq '.[].login'"
+      "gh api repos/:owner/:repo/collaborators --jq '.[].login'",
     )
       .toString()
       .trim();
@@ -94,7 +96,7 @@ const fetchCollaborators = (): string[] => {
     return collaborators;
   } catch (error) {
     console.error(
-      chalk.red(`Error fetching collaborators: ${(error as Error).message}`)
+      chalk.red(`Error fetching collaborators: ${(error as Error).message}`),
     );
     return [];
   }
@@ -106,7 +108,7 @@ const fetchLabels = (): string[] => {
     const spinner = ora("Fetching repository labels...").start();
 
     const labelsOutput = execSync(
-      "gh api repos/:owner/:repo/labels --jq '.[].name'"
+      "gh api repos/:owner/:repo/labels --jq '.[].name'",
     )
       .toString()
       .trim();
@@ -122,7 +124,7 @@ const fetchLabels = (): string[] => {
     return labels;
   } catch (error) {
     console.error(
-      chalk.red(`Error fetching labels: ${(error as Error).message}`)
+      chalk.red(`Error fetching labels: ${(error as Error).message}`),
     );
     return [];
   }
@@ -138,10 +140,19 @@ const fetchBranches = (): string[] => {
       .map((branch) => branch.trim().replace("origin/", ""))
       .filter((branch) => branch !== "HEAD ->" && !branch.includes("->"));
 
-    return branchesOutput;
+    const localBranches = execSync("git branch")
+      .toString()
+      .trim()
+      .split("\n")
+      .map((branch) => branch.trim())
+      .filter((branch) => branch !== "HEAD ->" && !branch.includes("->"));
+
+    return localBranches.length > branchesOutput.length
+      ? localBranches
+      : branchesOutput;
   } catch (error) {
     console.error(
-      chalk.red(`Error fetching branches: ${(error as Error).message}`)
+      chalk.red(`Error fetching branches: ${(error as Error).message}`),
     );
     return [];
   }
@@ -153,10 +164,54 @@ const getCurrentBranch = (): string => {
     return execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
   } catch (error) {
     console.error(
-      chalk.red(`Error getting current branch: ${(error as Error).message}`)
+      chalk.red(`Error getting current branch: ${(error as Error).message}`),
     );
     return "";
   }
+};
+
+// Function to create a feature branch when needed
+const createFeatureBranch = async (title: string): Promise<string> => {
+  try {
+    const spinner = ora("Creating feature branch...").start();
+
+    // Generate a clean branch name from the PR title
+    const branchName = `feature/${title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .slice(0, 50)}`; // Limit length
+
+    // Create and checkout the new branch
+    execSync(`git checkout -b ${branchName}`);
+
+    spinner.succeed(`Feature branch created: ${branchName}`);
+    return branchName;
+  } catch (error) {
+    throw new Error(
+      `Failed to create feature branch: ${(error as Error).message}`,
+    );
+  }
+};
+
+// Function to check if we need to create a feature branch
+const needsFeatureBranch = (
+  branches: string[],
+  currentBranch: string,
+): boolean => {
+  // If there's only one branch and it's main/master, we need a feature branch
+  if (branches.length === 1) {
+    const isMainBranch = ["main", "master"].includes(
+      currentBranch.toLowerCase(),
+    );
+    return isMainBranch;
+  }
+
+  // If current branch is main/master and user wants to create PR from it
+  const isOnMainBranch = ["main", "master"].includes(
+    currentBranch.toLowerCase(),
+  );
+  return isOnMainBranch;
 };
 
 // Interface for PR creation data
@@ -167,6 +222,7 @@ interface PRData {
   labels: string[];
   baseBranch: string;
   headBranch: string;
+  allBranches?: string[];
 }
 
 // Function to prompt for PR details
@@ -180,8 +236,8 @@ const promptPRDetails = async (): Promise<PRData> => {
   const defaultBaseBranch = branches.includes("main")
     ? "main"
     : branches.includes("master")
-    ? "master"
-    : "";
+      ? "master"
+      : "";
 
   console.log(chalk.cyan("\nCreate a new pull request\n"));
 
@@ -193,10 +249,11 @@ const promptPRDetails = async (): Promise<PRData> => {
       validate: (input) => input.trim() !== "" || "Title cannot be empty",
     },
     {
-      type: "editor",
+      type: "input",
       name: "body",
-      message: "Enter PR description (opens in your default editor):",
-      default: "## Changes\n\n## Testing\n\n## Screenshots\n\n",
+      message: "Enter PR description: ",
+      validate: (input) => input.trim() !== "",
+      default: "Base changes",
     },
     {
       type: "list",
@@ -238,13 +295,14 @@ const promptPRDetails = async (): Promise<PRData> => {
     labels: answers.labels || [],
     baseBranch: answers.baseBranch,
     headBranch: answers.headBranch,
+    allBranches: branches,
   };
 };
 
 // Function to create the PR
 const createPR = async (
   prData: PRData,
-  previewMode: boolean
+  previewMode: boolean,
 ): Promise<void> => {
   try {
     let command = `gh pr create --title "${prData.title.replace(/"/g, '\\"')}"`;
@@ -252,7 +310,47 @@ const createPR = async (
     // Add body
     command += ` --body "${prData.body.replace(/"/g, '\\"')}"`;
 
-    // Add base and head
+    // Check if we need to create a feature branch
+    const currentBranch = getCurrentBranch();
+    const shouldCreateFeatureBranch = needsFeatureBranch(
+      prData.allBranches || [],
+      currentBranch,
+    );
+
+    if (shouldCreateFeatureBranch) {
+      try {
+        const newFeatureBranch = await createFeatureBranch(prData.title);
+        prData.headBranch = newFeatureBranch;
+
+        console.log(
+          chalk.green(
+            `✓ Created and switched to feature branch: ${newFeatureBranch}`,
+          ),
+        );
+        console.log(
+          chalk.yellow(
+            `ℹ Make your changes and commit them, then run this command again to create the PR.`,
+          ),
+        );
+        return; // Exit early - user needs to make changes first
+      } catch (error) {
+        console.error(
+          chalk.red(
+            `Error creating feature branch: ${(error as Error).message}`,
+          ),
+        );
+        process.exit(1);
+      }
+    }
+
+    // Validate that base and head branches are different
+    if (prData.baseBranch === prData.headBranch) {
+      console.error(
+        chalk.red("Cannot create PR: base and head branches are the same"),
+      );
+      process.exit(1);
+    }
+
     command += ` --base "${prData.baseBranch}"`;
     command += ` --head "${prData.headBranch}"`;
 
