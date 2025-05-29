@@ -4,6 +4,7 @@ import { exec, execSync } from "child_process";
 import inquirer from "inquirer";
 import ora from "ora";
 import chalk from "chalk";
+import { exitCode } from "process";
 
 // Function to display help documentation
 const displayHelp = (): void => {
@@ -139,7 +140,16 @@ const fetchBranches = (): string[] => {
       .map((branch) => branch.trim().replace("origin/", ""))
       .filter((branch) => branch !== "HEAD ->" && !branch.includes("->"));
 
-    return branchesOutput;
+    const localBranches = execSync("git branch")
+      .toString()
+      .trim()
+      .split("\n")
+      .map((branch) => branch.trim())
+      .filter((branch) => branch !== "HEAD ->" && !branch.includes("->"));
+
+    return localBranches.length > branchesOutput.length
+      ? localBranches
+      : branchesOutput;
   } catch (error) {
     console.error(
       chalk.red(`Error fetching branches: ${(error as Error).message}`),
