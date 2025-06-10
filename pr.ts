@@ -146,10 +146,7 @@ const fetchBranches = (): string[] => {
       .trim()
       .split("\n")
       .map((branch) => branch.replace(/^\* /, "").trim())
-      .filter(
-        (branch) =>
-          (branch !== "HEAD ->" && !branch.includes("->")) ||
-      );
+      .filter((branch) => branch !== "HEAD ->" && !branch.includes("->"));
 
     return localBranches.length > branchesOutput.length
       ? localBranches
