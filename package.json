@@ -4,13 +4,15 @@
   "description": "Custom Git tools built with TypeScript and Bun",
   "type": "module",
   "scripts": {
-    "build": "bun build ./who.ts --compile --outfile who && bun build ./labels.ts --compile --outfile labels && bun build ./pr.ts --compile --outfile pr",
+    "build": "bun build ./who.ts --compile --outfile who && bun build ./labels.ts --compile --outfile labels && bun build ./pr.ts --compile --outfile pr && bun build ./switch.ts --compile --outfile switch",
     "build:who": "bun build ./who.ts --compile --outfile who",
     "build:labels": "bun build ./labels.ts --compile --outfile labels",
     "build:pr": "bun build ./pr.ts --compile --outfile pr",
+    "build:switch": "bun build ./switch.ts --compile --outfile switch",
     "dev:who": "bun who.ts",
     "dev:labels": "bun labels.ts",
-    "dev:pr": "bun pr.ts"
+    "dev:pr": "bun pr.ts",
+    "dev:switch": "bun switch.ts"
   },
   "dependencies": {
     "chalk": "^5.4.1",
