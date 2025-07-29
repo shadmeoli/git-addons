@@ -104,6 +104,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WHO_TS_PATH="$SCRIPT_DIR/who.ts"
 LABELS_TS_PATH="$SCRIPT_DIR/labels.ts"
 PR_TS_PATH="$SCRIPT_DIR/pr.ts"
+SWITCH_TS_PATH="$SCRIPT_DIR/switch.ts"
 
 # Verify scripts exist
 if [ ! -f "$WHO_TS_PATH" ]; then
@@ -111,11 +112,16 @@ if [ ! -f "$WHO_TS_PATH" ]; then
 fi
 
 if [ ! -f "$LABELS_TS_PATH" ]; then
-    error "'labels.ts' script not found at $LABELS_TS_PATH"
+    error "'labels.ts' script not found at $LABELS_TS_PATHpm2 logs glowbarldn.com
+"
 fi
 
 if [ ! -f "$PR_TS_PATH" ]; then
     error "'pr.ts' script not found at $PR_TS_PATH"
+fi
+
+if [ ! -f "$SWITCH_TS_PATH" ]; then
+    error "'switch.ts' script not found at $SWITCH_TS_PATH"
 fi
 
 log "Starting installation of Git tools..."
@@ -202,7 +208,7 @@ build_executables() {
     bun run build
     
     # Check if build was successful
-    if [ $? -eq 0 ] && [ -f "$SCRIPT_DIR/who" ] && [ -f "$SCRIPT_DIR/labels" ] && [ -f "$SCRIPT_DIR/pr" ]; then
+    if [ $? -eq 0 ] && [ -f "$SCRIPT_DIR/who" ] && [ -f "$SCRIPT_DIR/labels" ] && [ -f "$SCRIPT_DIR/pr" ] && [ -f "$SCRIPT_DIR/switch" ]; then
         log "Executables built successfully"
     else
         error "Failed to build executables"
@@ -223,11 +229,13 @@ install_executables() {
     cp "$SCRIPT_DIR/who" "$TMP_DIR/who"
     cp "$SCRIPT_DIR/labels" "$TMP_DIR/labels"
     cp "$SCRIPT_DIR/pr" "$TMP_DIR/pr"
+    cp "$SCRIPT_DIR/switch" "$TMP_DIR/switch"
     
     # Make them executable
     chmod +x "$TMP_DIR/who"
     chmod +x "$TMP_DIR/labels"
     chmod +x "$TMP_DIR/pr"
+    chmod +x "$TMP_DIR/switch"
     
     log "Executables installed successfully to $TMP_DIR"
     
@@ -242,6 +250,7 @@ install_executables() {
     echo "  $TMP_DIR/who"
     echo "  $TMP_DIR/labels"
     echo "  $TMP_DIR/pr"
+    echo "  $TMP_DIR/switch"
     echo ""
 }
 
@@ -288,6 +297,17 @@ fi
 EOL
     chmod +x "$WRAPPER_DIR/git-pr-wrapper.sh"
     
+    # Create wrapper for switch
+    cat > "$WRAPPER_DIR/git-switch-wrapper.sh" << EOL
+#!/bin/bash
+if [ "\$1" = "--help" ] || [ "\$1" = "-h" ]; then
+  "$TMP_DIR/switch" --help
+else
+  "$TMP_DIR/switch" "\$@"
+fi
+EOL
+    chmod +x "$WRAPPER_DIR/git-switch-wrapper.sh"
+    
     log "Wrapper scripts created successfully"
 }
 
@@ -302,14 +322,16 @@ setup_git_aliases() {
     WHO_WRAPPER="$WRAPPER_DIR/git-who-wrapper.sh"
     LABELS_WRAPPER="$WRAPPER_DIR/git-labels-wrapper.sh"
     PR_WRAPPER="$WRAPPER_DIR/git-pr-wrapper.sh"
+    SWITCH_WRAPPER="$WRAPPER_DIR/git-switch-wrapper.sh"
     
     # Configure Git aliases with wrapper scripts
     git config --global alias.who "!\"$WHO_WRAPPER\""
     git config --global alias.labels "!\"$LABELS_WRAPPER\""
     git config --global alias.pr "!\"$PR_WRAPPER\""
+    git config --global alias.switch "!\"$SWITCH_WRAPPER\""
     
     # Verify the aliases were set up correctly
-    if git config --global --get alias.who > /dev/null && git config --global --get alias.labels > /dev/null && git config --global --get alias.pr > /dev/null; then
+    if git config --global --get alias.who > /dev/null && git config --global --get alias.labels > /dev/null && git config --global --get alias.pr > /dev/null && git config --global --get alias.switch > /dev/null; then
         log "Git aliases configured successfully"
         
         # Show what was added to .gitconfig
@@ -318,11 +340,12 @@ setup_git_aliases() {
         echo "    who = !\"$WHO_WRAPPER\""
         echo "    labels = !\"$LABELS_WRAPPER\""
         echo "    pr = !\"$PR_WRAPPER\""
+        echo "    switch = !\"$SWITCH_WRAPPER\""
     else
         error "Failed to configure Git aliases"
     fi
     
-    log "You can now use 'git who', 'git labels', and 'git pr' commands"
+    log "You can now use 'git who', 'git labels', 'git pr', and 'git switch' commands"
 }
 
 # Main installation process
@@ -360,8 +383,8 @@ main() {
     find . -name "*.bun-build" -type f -delete
 
     log "Installation completed successfully!"
-    log "You can now use 'git who', 'git labels', and 'git pr' commands"
-    log "For help, run 'git who --help', 'git labels --help', or 'git pr --help'"
+    log "You can now use 'git who', 'git labels', 'git pr', and 'git switch' commands"
+    log "For help, run 'git who --help', 'git labels --help', 'git pr --help', or 'git switch --help'"
 }
 
 # Run the installation
