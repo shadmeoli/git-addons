@@ -1,0 +1,66 @@
+.TH GIT-SWITCH 1 "April 2025" "git-switch 1.0" "Git Manual"
+.SH NAME
+git-switch \- Interactive branch switcher with automatic fetching and rebasing
+.SH SYNOPSIS
+.B git switch
+[\fB\-\-help\fR] [\fB\-\-no\-rebase\fR] [\fB\-\-preview\fR]
+.SH DESCRIPTION
+\fBgit-switch\fR provides an interactive interface for switching Git branches with automatic fetching and rebasing functionality.
+
+The tool fetches the latest changes from all remotes, presents an interactive list of all available branches (both local and remote), and automatically rebases the selected branch after switching to it.
+.SH OPTIONS
+.TP
+\fB\-\-help\fR
+Display help information and exit.
+.TP
+\fB\-\-no\-rebase\fR
+Skip automatic rebase after switching branches.
+.TP
+\fB\-\-preview\fR
+Preview the commands that would be executed without actually running them.
+.SH FEATURES
+.TP
+\fBAutomatic Fetching\fR
+Fetches the latest changes from all configured remotes before presenting branch options.
+.TP
+\fBInteractive Selection\fR
+Presents a user-friendly interactive list of all available branches.
+.TP
+\fBSmart Branch Handling\fR
+Automatically creates local tracking branches for remote-only branches when selected.
+.TP
+\fBAutomatic Rebasing\fR
+Automatically rebases the selected branch onto the main branch (main/master) after switching.
+.TP
+\fBConflict Handling\fR
+Gracefully handles rebase conflicts and provides helpful guidance to resolve them.
+.SH WORKFLOW
+The tool follows this workflow:
+.TP
+1. Check that you're in a Git repository
+.TP
+2. Fetch latest changes from all remotes
+.TP
+3. Load all available local and remote branches
+.TP
+4. Present an interactive selection interface
+.TP
+5. Switch to the selected branch
+.TP
+6. Automatically rebase onto the main branch (unless \fB\-\-no\-rebase\fR is specified)
+.SH EXAMPLES
+.TP
+Interactive branch switching with automatic rebase:
+\fBgit switch\fR
+.TP
+Switch branches without rebasing:
+\fBgit switch --no-rebase\fR
+.TP
+Preview commands without executing them:
+\fBgit switch --preview\fR
+.SH NOTES
+The tool automatically determines the main branch by checking for \fBmain\fR, \fBmaster\fR, or the default remote branch. If you're already on the main branch, rebasing is skipped.
+
+When switching to a remote-only branch, the tool automatically creates a local tracking branch with the same name (without the remote prefix).
+.SH SEE ALSO
+\fBgit-who\fR(1), \fBgit-labels\fR(1), \fBgit-pr\fR(1), \fBgit-tags\fR(1) 
