@@ -31,6 +31,7 @@ WHO_MAN="$SCRIPT_DIR/git-who.1"
 LABELS_MAN="$SCRIPT_DIR/git-labels.1"
 TAGS_MAN="$SCRIPT_DIR/git-tags.1"
 PR_MAN="$SCRIPT_DIR/git-pr.1"
+SWITCH_MAN="$SCRIPT_DIR/git-switch.1"
 
 if [ ! -f "$WHO_MAN" ]; then
     error "git-who.1 not found. Make sure it's in the same directory as this script."
@@ -46,6 +47,10 @@ fi
 
 if [ ! -f "$PR_MAN" ]; then
     error "git-pr.1 not found. Make sure it's in the same directory as this script."
+fi
+
+if [ ! -f "$SWITCH_MAN" ]; then
+    error "git-switch.1 not found. Make sure it's in the same directory as this script."
 fi
 
 
@@ -105,6 +110,14 @@ EOL
 EOL
     chmod +x "$BIN_DIR/git-pr"
     
+    # Create git-switch command
+    cat > "$BIN_DIR/git-switch" << EOL
+#!/bin/bash
+# Git switch command
+"$TMP_DIR/switch" "\$@"
+EOL
+    chmod +x "$BIN_DIR/git-switch"
+    
     log "Git command scripts created in $BIN_DIR"
 }
 
@@ -144,6 +157,7 @@ if [ "$INSTALL_GLOBAL" = true ]; then
         sudo cp "$WHO_MAN" /usr/local/share/man/man1/
         sudo cp "$LABELS_MAN" /usr/local/share/man/man1/
         sudo cp "$PR_MAN" /usr/local/share/man/man1/
+        sudo cp "$SWITCH_MAN" /usr/local/share/man/man1/
         
         # Update man database
         if command -v mandb &> /dev/null; then
@@ -156,6 +170,7 @@ if [ "$INSTALL_GLOBAL" = true ]; then
         cp "$WHO_MAN" /usr/local/share/man/man1/
         cp "$LABELS_MAN" /usr/local/share/man/man1/
         cp "$TAGS_MAN" /usr/local/share/man/man1/
+        cp "$SWITCH_MAN" /usr/local/share/man/man1/
         
         # Update man database
         if command -v mandb &> /dev/null; then
@@ -179,6 +194,7 @@ else
     # Copy files
     cp "$WHO_MAN" "$USER_MAN_DIR/"
     cp "$LABELS_MAN" "$USER_MAN_DIR/"
+    cp "$SWITCH_MAN" "$USER_MAN_DIR/"
     
     # Update MANPATH if needed
     if [[ ":$MANPATH:" != *":$HOME/.local/share/man:"* ]]; then
@@ -210,5 +226,5 @@ else
 fi
 
 log "Installation completed successfully!"
-log "You can now use 'man git-who' or 'man git-labels'"
-log "If you created Git command scripts, 'git who --help' and 'git labels --help' will also work"
+log "You can now use 'man git-who', 'man git-labels', 'man git-pr', or 'man git-switch'"
+log "If you created Git command scripts, 'git who --help', 'git labels --help', 'git pr --help', and 'git switch --help' will also work"
