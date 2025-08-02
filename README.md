@@ -6,7 +6,7 @@ Custom Git tools built with TypeScript and compiled to native executables using 
 [![Bun](https://img.shields.io/badge/Built%20with-Bun-black)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
 
-## ✨ Features
+## Features
 
 ### `git who`
 
@@ -83,7 +83,7 @@ The installer will:
 5. Install the executables to the tmp directory in your repository
 6. Set up Git aliases with proper help handling
 
-## 🧰 Usage
+## Usage
 
 ### `git who`
 
@@ -149,7 +149,7 @@ man git-labels
 man git-pr
 ```
 
-## 🛠️ Development
+## Development
 
 ### Setup Development Environment
 
@@ -187,7 +187,7 @@ bun run build
 └── tmp/                  # Directory for compiled binaries
 ```
 
-## 🔄 Updating
+## Updating
 
 To update to the latest version:
 
@@ -199,7 +199,7 @@ git pull
 ./install.sh
 ```
 
-## 🛡️ Troubleshooting
+## Troubleshooting
 
 ### "No manual entry for git-who"
 
@@ -305,7 +305,7 @@ Follow the interactive prompts to create a new tag.
 nvim ~/.gitconfig
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -315,11 +315,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Bun](https://bun.sh/) for the amazing runtime and build tools
 - [Inquirer.js](https://github.com/SBoudrias/Inquirer.js) for interactive prompts
