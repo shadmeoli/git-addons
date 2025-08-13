@@ -1,5 +1,18 @@
 # Git Tools
 
+
+> [!INFO]  
+> I’m currently working on **V2** of this project.  
+> The new version will be written in Go to avoid having multiple binaries for each command entry.  
+>  
+> To access the beta versions, keep an eye on the **`V2-beta`** branch.  
+>  
+> If you’d like to help with the V2 porting, please create a **separate PR** for each ported command and follow the new project structure.  
+>  
+> With love, [Shad](https://devmeoli.top) ❤️
+
+
+
 Custom Git tools built with TypeScript and compiled to native executables using Bun.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
