@@ -3,8 +3,10 @@ package commands
 import (
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +17,7 @@ type Who struct {
 }
 
 var contributor, timeRange string
-var contributors []string
+var contributors []huh.Option[string]
 var whoCmd = &cobra.Command{
 	Use:   "who",
 	Short: "A simple tool to view Git logs based on the author and time range.",
@@ -93,10 +95,24 @@ func (w *Who) Run() error {
 }
 
 func (w *Who) getContributors() {
-	// __allContributors, _ := exec.Command("git", "log", "--format='%an'", "| sort", "| uniq").Output()
-	__allContributors, _ := exec.Command("git", "log", "--format='%an'").Output()
-	allContributors := string(__allContributors)
-	log.Info(allContributors)
+	__allContributors, _ := exec.Command("git", "log", "--format=%an").Output()
+	allContributors := strings.SplitSeq(string(__allContributors), "\n")
+	for contributor := range allContributors {
+		contributors = append(contributors, huh.NewOption(contributor, contributor))
+	}
+
+	contributorsSelect := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Select CSV File to Import").
+				Options(contributors...).
+				Value(&contributor),
+		),
+	)
+
+	if err := contributorsSelect.Run(); err != nil {
+		log.Error("Something went wrong", "err", err)
+	}
 
 }
 func (w *Who) getAuthors()                           {}
