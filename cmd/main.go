@@ -1,7 +1,7 @@
 package main
 
-import "github.com/charmbracelet/log"
+import "github.com/shadmeoli/gitAddons/pkg/commands"
 
 func main() {
-	log.Info("Hello World!")
+	commands.Execute()
 }
