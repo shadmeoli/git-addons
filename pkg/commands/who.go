@@ -167,7 +167,6 @@ func getLogs(author string, from string) []UserLogItem {
 }
 
 func logsTable(__logs []UserLogItem) {
-	fmt.Print("rednering table")
 	columns := []string{"Commit Hash", "Commit message", "Origin"}
 	var rows [][]string
 	for _, logItem := range __logs {
@@ -178,7 +177,7 @@ func logsTable(__logs []UserLogItem) {
 		})
 	}
 	table := table.New().
-		Border(lipgloss.HiddenBorder()).
+		Border(lipgloss.NormalBorder()).
 		Headers(columns...).
 		Rows(rows...).
 		StyleFunc(func(row, col int) lipgloss.Style {
@@ -190,6 +189,5 @@ func logsTable(__logs []UserLogItem) {
 			return lipgloss.NewStyle().
 				Foreground(lipgloss.Color("110"))
 		})
-
-	fmt.Print(table.Render())
+	fmt.Printf("%v\n", table.Render())
 }
