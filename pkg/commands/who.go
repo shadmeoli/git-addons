@@ -12,11 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// type Who struct {
-// 	cmd  *cobra.Command
-// 	args []string
-// }
-
 type UserLogItem struct {
 	CommitHash    string
 	Origin        *string
@@ -147,6 +142,9 @@ func getLogs(author string, from string) []UserLogItem {
 		fmt.Print(err)
 	}
 
+	// TODO:  fix this to better clean up log messages
+	// eg1: * 4ab3c4b (HEAD -> feature-V2/who-porting) update: color clean up and unification
+	// eg2: * 787bef9 (origin/V2-Beta, V2-Beta) update: git add ons rewrite -> base setup
 	for logItem := range strings.SplitSeq(string(logs), "\n") {
 		if logItem != "" {
 			var userLogItem UserLogItem
