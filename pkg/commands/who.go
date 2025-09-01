@@ -175,18 +175,25 @@ func logsTable(__logs []UserLogItem) {
 		})
 	}
 	table := table.New().
-		Border(lipgloss.NormalBorder()).
+		Border(lipgloss.HiddenBorder()).
 		Headers(columns...).
 		Rows(rows...).
 		StyleFunc(func(row, col int) lipgloss.Style {
 			// TODO: make this color apply to column names onlys
-			// if row == 0 {
-			// 	return lipgloss.NewStyle().
-			// 		Foreground(lipgloss.Color("212")).
-			// 		Bold(true)
-			// }
+			if col == 1 {
+				return lipgloss.NewStyle().
+					Width(60).
+					PaddingLeft(2).
+					Foreground(lipgloss.Color("#404040"))
+
+			}
+			if col == 2 {
+				return lipgloss.NewStyle().
+					PaddingLeft(2).
+					Foreground(lipgloss.Color("#9333ea"))
+			}
 			return lipgloss.NewStyle().
-				Foreground(lipgloss.Color("250"))
+				Foreground(lipgloss.Color("#fbbf24"))
 		})
 	fmt.Printf("%v\n", table.Render())
 }
