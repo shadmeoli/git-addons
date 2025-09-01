@@ -1,10 +1,9 @@
 package commands
 
 import (
+	"fmt"
 	"os/exec"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/log"
@@ -21,8 +20,7 @@ var contributors []huh.Option[string]
 var whoCmd = &cobra.Command{
 	Use:   "who",
 	Short: "A simple tool to view Git logs based on the author and time range.",
-	Long: `Git Who - Custom Git Logs Tool
-  ================================
+	Long: `Git Who - Custom Git Logs Tool\n
 
   A simple tool to view Git logs based on the author and time range.
 
@@ -63,19 +61,19 @@ var whoCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		who := Who{cmd: cmd, args: args}
-		if len(args) == 0 {
-			if err := who.Run(); err != nil {
-				log.Info("Could not fetch current author")
-			}
-		}
-		who.getContributors()
+		// if len(args) == 0 {
+		// 	who.getContributors()
+		// 	who.selectTimeRange()
+		// }
+		logs := who.getLogs(contributor, timeRange)
+		fmt.Print(strings.Join(logs, "\n"))
 	},
 }
 
 func currentContributor() string {
 	value, err := exec.Command("git", "config", "user.name").Output()
 	if err != nil {
-		log.Errorf("Could not get current author", err)
+		log.Errorf("Could not get current author, %v", err)
 		return ""
 	}
 	return string(value)
@@ -85,7 +83,7 @@ func init() {
 	rootCmd.AddCommand(whoCmd)
 	currentActiveContributor := currentContributor()
 	whoCmd.Flags().StringVarP(&contributor, "contributor", "t", currentActiveContributor, "Current author")
-	whoCmd.Flags().StringVarP(&timeRange, "timerange", "T", strconv.Itoa(time.Now().Day()), "Time range of logs to fetch with a default of the past 7 days")
+	whoCmd.Flags().StringVarP(&timeRange, "timerange", "T", "1 week ago", "Time range of logs to fetch with a default of the past 7 days")
 }
 
 func (w *Who) Run() error {
@@ -104,16 +102,54 @@ func (w *Who) getContributors() {
 	contributorsSelect := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
-				Title("Select CSV File to Import").
+				Title("Select assignee").
 				Options(contributors...).
 				Value(&contributor),
 		),
 	)
 
+	if timeRange == "" {
+		timeRange = "1 week ago"
+	}
 	if err := contributorsSelect.Run(); err != nil {
 		log.Error("Something went wrong", "err", err)
 	}
 
 }
-func (w *Who) getAuthors()                           {}
-func (w *Who) getLogs(author string, from time.Time) {}
+
+func (w *Who) selectTimeRange() {
+	ranges := huh.NewOptions("1 day ago",
+		"1 week ago",
+		"2 weeks ago",
+		"1 month ago",
+		"3 months ago",
+		"6 months ago")
+
+	timeRangeSelect := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Select time range").
+				Options(ranges...).
+				Value(&timeRange),
+		),
+	)
+	timeRangeSelect.Run()
+
+}
+
+func (w *Who) getLogs(author string, from string) []string {
+	logs, err := exec.Command(
+		"git", "log",
+		"--oneline",
+		"--decorate",
+		"--graph",
+		"--date=short",
+		fmt.Sprintf("--since='%v'", from),
+		fmt.Sprintf("--author=%v", author)).
+		Output()
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	return strings.Split(string(logs), "\n")
+}
