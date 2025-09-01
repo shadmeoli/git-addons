@@ -181,13 +181,14 @@ func logsTable(__logs []UserLogItem) {
 		Headers(columns...).
 		Rows(rows...).
 		StyleFunc(func(row, col int) lipgloss.Style {
-			if row == 0 {
-				return lipgloss.NewStyle().
-					Foreground(lipgloss.Color("212")).
-					Bold(true)
-			}
+			// TODO: make this color apply to column names onlys
+			// if row == 0 {
+			// 	return lipgloss.NewStyle().
+			// 		Foreground(lipgloss.Color("212")).
+			// 		Bold(true)
+			// }
 			return lipgloss.NewStyle().
-				Foreground(lipgloss.Color("110"))
+				Foreground(lipgloss.Color("250"))
 		})
 	fmt.Printf("%v\n", table.Render())
 }
