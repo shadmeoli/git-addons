@@ -10,10 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type Who struct {
-	cmd  *cobra.Command
-	args []string
-}
+// type Who struct {
+// 	cmd  *cobra.Command
+// 	args []string
+// }
 
 var contributor, timeRange string
 var contributors []huh.Option[string]
@@ -60,39 +60,31 @@ var whoCmd = &cobra.Command{
   For more information, refer to the documentation or visit the Git repository.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		who := Who{cmd: cmd, args: args}
-		// if len(args) == 0 {
-		// 	who.getContributors()
-		// 	who.selectTimeRange()
-		// }
-		logs := who.getLogs(contributor, timeRange)
+		if contributor == "" {
+			getContributors()
+		}
+		if timeRange == "" {
+			selectTimeRange()
+		}
+		logs := getLogs(contributor, timeRange)
 		fmt.Print(strings.Join(logs, "\n"))
 	},
 }
 
-func currentContributor() string {
-	value, err := exec.Command("git", "config", "user.name").Output()
-	if err != nil {
-		log.Errorf("Could not get current author, %v", err)
-		return ""
-	}
-	return string(value)
-}
-
 func init() {
 	rootCmd.AddCommand(whoCmd)
-	currentActiveContributor := currentContributor()
-	whoCmd.Flags().StringVarP(&contributor, "contributor", "t", currentActiveContributor, "Current author")
-	whoCmd.Flags().StringVarP(&timeRange, "timerange", "T", "1 week ago", "Time range of logs to fetch with a default of the past 7 days")
+	// currentActiveContributor := currentContributor()
+	whoCmd.Flags().StringVarP(&contributor, "contributor", "t", "", "Authors name based on how git registers it")
+	whoCmd.Flags().StringVarP(&timeRange, "timerange", "T", "", "Time range of logs to fetch with a default of the past 7 days")
 }
 
-func (w *Who) Run() error {
-	__currentActiveContributor := currentContributor()
-	log.Infof("Contributor: %v", __currentActiveContributor)
-	return nil
-}
+// func (w *Who) Run() error {
+// 	__currentActiveContributor := currentContributor()
+// 	log.Infof("Contributor: %v", __currentActiveContributor)
+// 	return nil
+// }
 
-func (w *Who) getContributors() {
+func getContributors() {
 	__allContributors, _ := exec.Command("git", "log", "--format=%an").Output()
 	allContributors := strings.SplitSeq(string(__allContributors), "\n")
 	for contributor := range allContributors {
@@ -117,7 +109,7 @@ func (w *Who) getContributors() {
 
 }
 
-func (w *Who) selectTimeRange() {
+func selectTimeRange() {
 	ranges := huh.NewOptions("1 day ago",
 		"1 week ago",
 		"2 weeks ago",
@@ -137,7 +129,7 @@ func (w *Who) selectTimeRange() {
 
 }
 
-func (w *Who) getLogs(author string, from string) []string {
+func getLogs(author string, from string) []string {
 	logs, err := exec.Command(
 		"git", "log",
 		"--oneline",
