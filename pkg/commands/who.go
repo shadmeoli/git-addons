@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
@@ -14,6 +16,12 @@ import (
 // 	cmd  *cobra.Command
 // 	args []string
 // }
+
+type UserLogItem struct {
+	CommitHash    string
+	Origin        *string
+	CommitMessage string
+}
 
 var contributor, timeRange string
 var contributors []huh.Option[string]
@@ -66,23 +74,17 @@ var whoCmd = &cobra.Command{
 		if timeRange == "" {
 			selectTimeRange()
 		}
-		logs := getLogs(contributor, timeRange)
-		fmt.Print(strings.Join(logs, "\n"))
+		__logs := getLogs(contributor, timeRange)
+		logsTable(__logs)
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(whoCmd)
-	// currentActiveContributor := currentContributor()
 	whoCmd.Flags().StringVarP(&contributor, "contributor", "t", "", "Authors name based on how git registers it")
 	whoCmd.Flags().StringVarP(&timeRange, "timerange", "T", "", "Time range of logs to fetch with a default of the past 7 days")
 }
-
-// func (w *Who) Run() error {
-// 	__currentActiveContributor := currentContributor()
-// 	log.Infof("Contributor: %v", __currentActiveContributor)
-// 	return nil
-// }
 
 func getContributors() {
 	__allContributors, _ := exec.Command("git", "log", "--format=%an").Output()
@@ -110,7 +112,8 @@ func getContributors() {
 }
 
 func selectTimeRange() {
-	ranges := huh.NewOptions("1 day ago",
+	ranges := huh.NewOptions(
+		"1 day ago",
 		"1 week ago",
 		"2 weeks ago",
 		"1 month ago",
@@ -126,10 +129,11 @@ func selectTimeRange() {
 		),
 	)
 	timeRangeSelect.Run()
-
 }
 
-func getLogs(author string, from string) []string {
+func getLogs(author string, from string) []UserLogItem {
+	var userLogItems []UserLogItem
+	baseOrigin := "origin"
 	logs, err := exec.Command(
 		"git", "log",
 		"--oneline",
@@ -143,5 +147,49 @@ func getLogs(author string, from string) []string {
 		fmt.Print(err)
 	}
 
-	return strings.Split(string(logs), "\n")
+	for logItem := range strings.SplitSeq(string(logs), "\n") {
+		if logItem != "" {
+			var userLogItem UserLogItem
+			commitLog := strings.Split(logItem, " ")[1:len(strings.Split(logItem, " "))]
+			hasOrigin := len(commitLog) == 3
+			if hasOrigin {
+				userLogItem.Origin = &commitLog[1]
+			} else {
+				userLogItem.Origin = &baseOrigin
+			}
+			userLogItem.CommitHash = commitLog[0]
+			userLogItem.CommitMessage = commitLog[2]
+			userLogItems = append(userLogItems, userLogItem)
+		}
+	}
+
+	return userLogItems
+}
+
+func logsTable(__logs []UserLogItem) {
+	fmt.Print("rednering table")
+	columns := []string{"Commit Hash", "Commit message", "Origin"}
+	var rows [][]string
+	for _, logItem := range __logs {
+		rows = append(rows, []string{
+			logItem.CommitHash,
+			logItem.CommitMessage,
+			*logItem.Origin,
+		})
+	}
+	table := table.New().
+		Border(lipgloss.HiddenBorder()).
+		Headers(columns...).
+		Rows(rows...).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == 0 {
+				return lipgloss.NewStyle().
+					Foreground(lipgloss.Color("212")).
+					Bold(true)
+			}
+			return lipgloss.NewStyle().
+				Foreground(lipgloss.Color("110"))
+		})
+
+	fmt.Print(table.Render())
 }
