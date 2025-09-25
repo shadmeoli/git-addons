@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
 	"github.com/charmbracelet/log"
@@ -14,16 +15,17 @@ import (
 
 type UserLogItem struct {
 	CommitHash    string
-	Origin        *string
 	CommitMessage string
+	Date          string
+	Author        string
 }
 
 var contributor, timeRange string
-var contributors []huh.Option[string]
+
 var whoCmd = &cobra.Command{
 	Use:   "who",
 	Short: "A simple tool to view Git logs based on the author and time range.",
-	Long: `Git Who - Custom Git Logs Tool\n
+	Long: `Git Who - Custom Git Logs Tool
 
   A simple tool to view Git logs based on the author and time range.
 
@@ -40,7 +42,7 @@ var whoCmd = &cobra.Command{
     -t and -T are optional flags that can be used together to interactively select both the author and the time range.
 
   Examples:
-    1. Default: View the logs of the current user in the last week:
+    1. Default: Interactive menu to choose what to do:
        git who
 
     2. View the logs for a specific author in the last week:
@@ -59,51 +61,208 @@ var whoCmd = &cobra.Command{
     "1 month ago"
     "3 months ago"
     "6 months ago"
-
-  For more information, refer to the documentation or visit the Git repository.`,
+`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if contributor == "" {
-			getContributors()
-		}
-		if timeRange == "" {
-			selectTimeRange()
-		}
-		__logs := getLogs(contributor, timeRange)
-		logsTable(__logs)
+		// var err error
 
+		// Handle positional argument for contributor (direct author mode)
+		if len(args) > 0 {
+			contributor = args[0]
+			// Default time range for direct mode
+			if timeRange == "" {
+				timeRange = "1 week ago"
+			}
+			// Skip interactive menu and go straight to fetching logs
+			fetchAndDisplayLogs()
+			return
+		}
+
+		// If flags are provided, handle them
+		if cmd.Flags().Changed("contributor") || cmd.Flags().Changed("timerange") {
+			handleFlagMode(cmd)
+			return
+		}
+
+		// Default behavior: Show interactive menu
+		showMainMenu()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(whoCmd)
-	whoCmd.Flags().StringVarP(&contributor, "contributor", "t", "", "Authors name based on how git registers it")
-	whoCmd.Flags().StringVarP(&timeRange, "timerange", "T", "", "Time range of logs to fetch with a default of the past 7 days")
+	whoCmd.Flags().StringVarP(&contributor, "contributor", "t", "", "Select author interactively")
+	whoCmd.Flags().StringVarP(&timeRange, "timerange", "T", "", "Select time range interactively")
 }
 
-func getContributors() {
-	__allContributors, _ := exec.Command("git", "log", "--format=%an").Output()
-	allContributors := strings.SplitSeq(string(__allContributors), "\n")
-	for contributor := range allContributors {
-		contributors = append(contributors, huh.NewOption(contributor, contributor))
-	}
+func showMainMenu() {
+	var choice string
 
-	contributorsSelect := huh.NewForm(
+	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
-				Title("Select assignee").
-				Options(contributors...).
-				Value(&contributor),
+				Title("What would you like to do?").
+				Options(
+					huh.NewOption("Viewing past week commits (default)", "my_recent"),
+					huh.NewOption("Select an author", "select_author"),
+					huh.NewOption("Select author and time range", "select_both"),
+					huh.NewOption("View all contributors", "view_contributors"),
+				).
+				Value(&choice),
 		),
-	)
+	).WithTheme(huh.ThemeCatppuccin())
 
+	if err := form.Run(); err != nil {
+		log.Error("Something went wrong with menu selection", "err", err)
+		return
+	}
+
+	switch choice {
+	case "my_recent":
+		var err error
+		contributor, err = getGitUser()
+		if err != nil {
+			log.Error("Unable to get git user.name", "err", err)
+			return
+		}
+		timeRange = "1 week ago"
+		fetchAndDisplayLogs()
+
+	case "select_author":
+		getContributors()
+		if contributor == "" {
+			return
+		}
+		timeRange = "1 week ago"
+		fetchAndDisplayLogs()
+
+	case "select_both":
+		getContributors()
+		if contributor == "" {
+			return
+		}
+		selectTimeRange()
+		if timeRange == "" {
+			timeRange = "1 week ago"
+		}
+		fetchAndDisplayLogs()
+
+	case "view_contributors":
+		viewAllContributors()
+	}
+}
+
+func handleFlagMode(cmd *cobra.Command) {
+	var err error
+
+	// If no contributor is given, fall back to git config user.name
+	if contributor == "" && !cmd.Flags().Changed("contributor") {
+		contributor, err = getGitUser()
+		if err != nil {
+			log.Error("Unable to get git user.name", "err", err)
+			return
+		}
+	}
+
+	// Interactive contributor selection
+	if cmd.Flags().Changed("contributor") && contributor == "" {
+		getContributors()
+		if contributor == "" {
+			log.Info("No contributor selected, exiting")
+			return
+		}
+	}
+
+	// Interactive time range selection
+	if cmd.Flags().Changed("timerange") && timeRange == "" {
+		selectTimeRange()
+		if timeRange == "" {
+			log.Info("No time range selected, exiting")
+			return
+		}
+	}
+
+	// Default time range
 	if timeRange == "" {
 		timeRange = "1 week ago"
 	}
-	if err := contributorsSelect.Run(); err != nil {
+
+	fetchAndDisplayLogs()
+}
+
+func fetchAndDisplayLogs() {
+	var logs []UserLogItem
+	sp := spinner.New().
+		Title(fmt.Sprintf("Fetching logs for %s...", contributor)).
+		Action(func() {
+			logs = getLogs(contributor, timeRange)
+		})
+
+	if err := sp.Run(); err != nil {
 		log.Error("Something went wrong", "err", err)
+		return
 	}
 
+	if len(logs) == 0 {
+		fmt.Printf("No commits found for %s since %s\n", contributor, timeRange)
+		return
+	}
+
+	fmt.Printf("\nCommits by %s since %s:\n\n", contributor, timeRange)
+	logsTable(logs)
+}
+
+func getGitUser() (string, error) {
+	out, err := exec.Command("git", "config", "user.name").Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
+func getContributors() {
+	__allContributors, err := exec.Command("git", "log", "--format=%an").Output()
+	if err != nil {
+		log.Error("Failed to get contributors", "err", err)
+		return
+	}
+
+	unique := make(map[string]struct{})
+	var contributorList []string
+
+	for name := range strings.SplitSeq(string(__allContributors), "\n") {
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+		if _, exists := unique[name]; !exists {
+			unique[name] = struct{}{}
+			contributorList = append(contributorList, name)
+		}
+	}
+
+	if len(contributorList) == 0 {
+		log.Error("No contributors found in git history")
+		return
+	}
+
+	options := make([]huh.Option[string], 0, len(contributorList))
+	for _, c := range contributorList {
+		options = append(options, huh.NewOption(c, c))
+	}
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Select an author to view logs for:").
+				Options(options...).
+				Value(&contributor),
+		),
+	).WithTheme(huh.ThemeCatppuccin())
+
+	if err := form.Run(); err != nil {
+		log.Error("Something went wrong with contributor selection", "err", err)
+	}
 }
 
 func selectTimeRange() {
@@ -113,87 +272,114 @@ func selectTimeRange() {
 		"2 weeks ago",
 		"1 month ago",
 		"3 months ago",
-		"6 months ago")
+		"6 months ago",
+	)
 
-	timeRangeSelect := huh.NewForm(
+	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
-				Title("Select time range").
+				Title("Select a time range for the logs:").
 				Options(ranges...).
 				Value(&timeRange),
 		),
-	)
-	timeRangeSelect.Run()
+	).WithTheme(huh.ThemeCatppuccin())
+
+	if err := form.Run(); err != nil {
+		log.Error("Something went wrong with time range selection", "err", err)
+	}
+}
+
+func viewAllContributors() {
+	__allContributors, err := exec.Command("git", "log", "--format=%an").Output()
+	if err != nil {
+		log.Error("Failed to get contributors", "err", err)
+		return
+	}
+
+	unique := make(map[string]struct{})
+	var contributorList []string
+
+	for _, name := range strings.Split(string(__allContributors), "\n") {
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+		if _, exists := unique[name]; !exists {
+			unique[name] = struct{}{}
+			contributorList = append(contributorList, name)
+		}
+	}
+
+	if len(contributorList) == 0 {
+		fmt.Println("No contributors found in git history")
+		return
+	}
+
+	fmt.Printf("\nAll Contributors (%d):\n\n", len(contributorList))
+	for i, contributor := range contributorList {
+		fmt.Printf("%d. %s\n", i+1, contributor)
+	}
+	fmt.Println()
 }
 
 func getLogs(author string, from string) []UserLogItem {
 	var userLogItems []UserLogItem
-	baseOrigin := "origin"
 	logs, err := exec.Command(
 		"git", "log",
-		"--oneline",
-		"--decorate",
-		"--graph",
-		"--date=short",
-		fmt.Sprintf("--since='%v'", from),
-		fmt.Sprintf("--author=%v", author)).
+		fmt.Sprintf("--author=%s", author),
+		fmt.Sprintf("--since=%s", from),
+		"--pretty=format:%h|%s|%ad|%an",
+		"--date=short").
 		Output()
 	if err != nil {
-		fmt.Print(err)
+		log.Error("Error fetching logs", "err", err)
+		return userLogItems
 	}
 
-	// TODO:  fix this to better clean up log messages
-	// eg1: * 4ab3c4b (HEAD -> feature-V2/who-porting) update: color clean up and unification
-	// eg2: * 787bef9 (origin/V2-Beta, V2-Beta) update: git add ons rewrite -> base setup
-	for logItem := range strings.SplitSeq(string(logs), "\n") {
-		if logItem != "" {
-			var userLogItem UserLogItem
-			commitLog := strings.Split(logItem, " ")[1:len(strings.Split(logItem, " "))]
-			hasOrigin := len(commitLog) == 3
-			if hasOrigin {
-				userLogItem.Origin = &commitLog[1]
-			} else {
-				userLogItem.Origin = &baseOrigin
-			}
-			userLogItem.CommitHash = commitLog[0]
-			userLogItem.CommitMessage = commitLog[2]
-			userLogItems = append(userLogItems, userLogItem)
+	for _, line := range strings.Split(string(logs), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
 		}
+		parts := strings.Split(line, "|")
+		if len(parts) < 4 {
+			continue
+		}
+		userLogItems = append(userLogItems, UserLogItem{
+			CommitHash:    parts[0],
+			CommitMessage: parts[1],
+			Date:          parts[2],
+			Author:        parts[3],
+		})
 	}
-
 	return userLogItems
 }
 
 func logsTable(__logs []UserLogItem) {
-	columns := []string{"Commit Hash", "Commit message", "Origin"}
+	columns := []string{"Hash", "Message", "Date", "Author"}
 	var rows [][]string
 	for _, logItem := range __logs {
 		rows = append(rows, []string{
 			logItem.CommitHash,
 			logItem.CommitMessage,
-			*logItem.Origin,
+			logItem.Date,
+			logItem.Author,
 		})
 	}
+
 	table := table.New().
-		Border(lipgloss.HiddenBorder()).
+		Border(lipgloss.NormalBorder()).
 		Headers(columns...).
 		Rows(rows...).
 		StyleFunc(func(row, col int) lipgloss.Style {
-			// TODO: make this color apply to column names onlys
-			if col == 1 {
+			if row == 0 {
 				return lipgloss.NewStyle().
-					Width(60).
-					PaddingLeft(2).
-					Foreground(lipgloss.Color("#404040"))
-
-			}
-			if col == 2 {
-				return lipgloss.NewStyle().
-					PaddingLeft(2).
-					Foreground(lipgloss.Color("#9333ea"))
+					Foreground(lipgloss.Color("36")). // cyan like cli-table3
+					Bold(true)
 			}
 			return lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#fbbf24"))
+				Foreground(lipgloss.Color("7")) // gray
 		})
-	fmt.Printf("%v\n", table.Render())
+
+	fmt.Println(table.Render())
 }
