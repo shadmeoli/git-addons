@@ -1,17 +1,27 @@
 # Git Tools
 
-
-> [!INFO]  
-> I’m currently working on **V2** of this project.  
-> The new version will be written in Go to avoid having multiple binaries for each command entry.  
->  
-> To access the beta versions, keep an eye on the **`V2-beta`** branch.  
->  
-> If you’d like to help with the V2 porting, please create a **separate PR** for each ported command and follow the new project structure.  
->  
-> With love, [Shad](https://devmeoli.top) ❤️
-
-
+> ⚠️ This repository contains the original Bun + TypeScript implementation of Git Tools.
+>
+> The next generation of the project is being rebuilt in Go under
+> [Kairos](https://github.com/shadmeoli/kairos).
+>
+> Kairos is designed as a modular version control workflow platform where Git becomes a plugin rather than a hard dependency.
+>
+> The long-term goal is to support multiple VCS backends and workflows.
+>
+> The rewrite focuses on:
+>
+> - single-binary distribution
+> - modular command architecture
+> - provider-based VCS integrations
+> - improved performance
+> - cleaner extensibility
+>
+> Experimental work may still appear in the `V2-beta` branch during the migration but not assured, it will be more of a kitchen sink but it's still in `.ts`.
+>
+> Contributions are welcome — please keep PRs focused on individual command ports or provider integrations.
+>
+> With love, Meoli ❤️
 
 Custom Git tools built with TypeScript and compiled to native executables using Bun.
 
